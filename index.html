@@ -160,6 +160,10 @@ body{font-family:'Sarabun',sans-serif;background:#f1f3f9;color:var(--text);min-h
 .rpt-dept-name{font-size:17px;font-weight:700;color:#1a2744;display:flex;align-items:center;gap:8px}
 .rpt-dept-avg{font-size:17px;font-weight:700;color:var(--blue2)}
 
+/* TABLE SCROLL WRAPPER */
+.tscroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tscroll table{min-width:420px}
+
 @media(max-width:900px){
   .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}
   .main{margin-left:0}
@@ -169,6 +173,22 @@ body{font-family:'Sarabun',sans-serif;background:#f1f3f9;color:var(--text);min-h
   .topbar,.content{padding-left:14px;padding-right:14px}
   .hamburger{display:flex}
   .rbtn{min-width:52px;height:54px}.rbtn .rn{font-size:20px}
+  /* Fix tables on mobile */
+  .ptable,.dtable{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap}
+  .ptable thead,.ptable tbody,.dtable thead,.dtable tbody{display:table;width:100%}
+  /* Fix deptcrit grid on mobile */
+  div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important}
+  /* Fix topbar on small screens */
+  .topbar{padding:0 10px;height:auto;min-height:52px;flex-wrap:wrap;gap:6px;padding-top:8px;padding-bottom:8px}
+  .page-title{font-size:16px}
+  .month-lbl{font-size:12px}
+  .logout-btn{font-size:12px;padding:5px 10px}
+  /* Action bar wrap */
+  .action-bar{padding:10px 12px}
+  .abtn{padding:8px 12px;font-size:13px}
+  /* Score bar wrap */
+  .score-bar{font-size:14px;gap:12px;padding:10px 14px}
+  /* Stats grid 1 col on very small */
 }
 </style>
 </head>
@@ -477,7 +497,7 @@ function pageDash(){
 <div class="panels-grid">
   <div class="panel">
     <div class="panel-header"><div class="panel-title"><div class="pdot pdot-amber"></div>รอประเมิน</div><div class="link-btn" onclick="go('evaluate')">ไปประเมิน →</div></div>
-    <table class="ptable"><thead><tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th>สถานะ</th></tr></thead><tbody>
+    <div class="tscroll"><table class="ptable"><thead><tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th>สถานะ</th></tr></thead><tbody>
       ${vEmp.filter(e=>!EVALS[monthKey]?.[e.id]).slice(0,5).map(e=>`<tr>
         <td><span class="code">${e.id}</span></td>
         <td><span class="ename">${e.name}</span></td>
@@ -485,11 +505,11 @@ function pageDash(){
         <td><span class="badge badge-amber">รอ</span></td>
       </tr>`).join('')}
       ${vEmp.filter(e=>!EVALS[monthKey]?.[e.id]).length===0?`<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted)">✅ ประเมินครบทุกคนแล้ว</td></tr>`:''}
-    </tbody></table>
+    </tbody></table></div>
   </div>
   <div class="panel">
     <div class="panel-header"><div class="panel-title"><div class="pdot pdot-green"></div>คะแนนสูงสุด</div><div class="link-btn" onclick="go('report')">ดูรายงาน →</div></div>
-    <table class="ptable"><thead><tr><th>#</th><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th>คะแนน</th></tr></thead><tbody>
+    <div class="tscroll"><table class="ptable"><thead><tr><th>#</th><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th>คะแนน</th></tr></thead><tbody>
       ${scored.slice(0,5).map((e,i)=>`<tr>
         <td style="color:var(--muted);font-weight:700">${i+1}</td>
         <td><span class="code">${e.id}</span></td>
@@ -498,7 +518,7 @@ function pageDash(){
         <td><span class="badge badge-green">${e.s.avg}</span></td>
       </tr>`).join('')}
       ${scored.length===0?`<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">ยังไม่มีผลประเมิน</td></tr>`:''}
-    </tbody></table>
+    </tbody></table></div>
   </div>
 </div>
 <div class="panel" style="margin-bottom:20px">
@@ -526,7 +546,7 @@ function pageEval(){
 <div class="panels-grid">
   <div class="panel">
     <div class="panel-header"><div class="panel-title"><div class="pdot pdot-amber"></div>รอประเมิน (${pending.length})</div></div>
-    <table class="ptable"><thead><tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th>หัวข้อ</th><th></th></tr></thead><tbody>
+    <div class="tscroll"><table class="ptable"><thead><tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th>หัวข้อ</th><th></th></tr></thead><tbody>
       ${pending.map(e=>{const nc=deptCrit(e.dept).length;return`<tr>
         <td><span class="code">${e.id}</span></td>
         <td><span class="ename">${e.name}</span></td>
@@ -535,11 +555,11 @@ function pageEval(){
         <td><button class="abtn abtn-blue" style="padding:6px 12px;font-size:13px" onclick="openEvalModal('${e.id}')">ประเมิน →</button></td>
       </tr>`;}).join('')}
       ${pending.length===0?`<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">✅ ประเมินครบทุกคนแล้ว</td></tr>`:''}
-    </tbody></table>
+    </tbody></table></div>
   </div>
   <div class="panel">
     <div class="panel-header"><div class="panel-title"><div class="pdot pdot-green"></div>ประเมินแล้ว (${done.length})</div></div>
-    <table class="ptable"><thead><tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th>คะแนน</th><th></th></tr></thead><tbody>
+    <div class="tscroll"><table class="ptable"><thead><tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th>คะแนน</th><th></th></tr></thead><tbody>
       ${done.map(e=>{const s=getScore(e.id,e.dept);return`<tr>
         <td><span class="code">${e.id}</span></td>
         <td><span class="ename">${e.name}</span></td>
@@ -548,7 +568,7 @@ function pageEval(){
         <td><button class="abtn" style="background:#f1f3f9;color:var(--navy);padding:5px 10px;font-size:12px" onclick="openEvalModal('${e.id}')">แก้ไข</button></td>
       </tr>`;}).join('')}
       ${done.length===0?`<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">ยังไม่มีผลประเมิน</td></tr>`:''}
-    </tbody></table>
+    </tbody></table></div>
   </div>
 </div>`;
 }
@@ -855,7 +875,7 @@ function pageAccounts(){
   <button class="abtn abtn-blue" onclick="openAddAcct()">+ เพิ่มบัญชี</button>
 </div>
 <div class="tcard">
-  <table class="dtable">
+  <div class="tscroll"><table class="dtable">
     <thead><tr><th>ชื่อผู้ใช้</th><th>ชื่อแสดง</th><th>บทบาท</th><th>แผนก</th><th>จัดการ</th></tr></thead>
     <tbody>
       ${ACCOUNTS.map(a=>`<tr>
@@ -866,7 +886,7 @@ function pageAccounts(){
         <td>${a.username!=='admin'?`<button class="back-btn" style="font-size:13px;color:var(--red);border-color:#ffc9c9" onclick="delAcct('${a.username}')">ลบ</button>`:'<span style="color:var(--muted);font-size:12px">ลบไม่ได้</span>'}</td>
       </tr>`).join('')}
     </tbody>
-  </table>
+  </table></div>
 </div>`;
 }
 function openAddAcct(){
