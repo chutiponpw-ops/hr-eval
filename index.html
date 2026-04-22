@@ -359,22 +359,68 @@ const DEF_CRIT=[
   {id:15,dept:'5สี',cat:'พฤติกรรม',name:'ความรับผิดชอบต่องาน'},
 ];
 
-let S=JSON.parse(localStorage.getItem('hr5_set')||'null')||{...DEF_SET,depts:[...DEF_SET.depts],ratingLabels:[...DEF_RL],sheetsUrl:''};
-let ACCOUNTS=JSON.parse(localStorage.getItem('hr5_accts')||'null')||DEF_ACCOUNTS.map(a=>({...a}));
-let EMP=JSON.parse(localStorage.getItem('hr5_emp')||'null')||DEF_EMP.map(e=>({...e}));
-let CRIT=JSON.parse(localStorage.getItem('hr5_crit')||'null')||DEF_CRIT.map(c=>({...c}));
-let EVALS=JSON.parse(localStorage.getItem('hr5_eval')||'{}');
-// EVALS[monthKey][empId] = {scores:{critId:val,...}, evaluatorName:'...'}
+let S={...DEF_SET,depts:[...DEF_SET.depts],ratingLabels:[...DEF_RL],sheetsUrl:localStorage.getItem('hr5_sheetsUrl')||''};
+let ACCOUNTS=DEF_ACCOUNTS.map(a=>({...a}));
+let EMP=DEF_EMP.map(e=>({...e}));
+let CRIT=DEF_CRIT.map(c=>({...c}));
+let EVALS={};
 let currentUser=null;
+let _loading=false;
 
+// ── บันทึก URL ใน localStorage เท่านั้น ──
 function save(){
+  try{ localStorage.setItem('hr5_sheetsUrl', S.sheetsUrl||''); }catch(e){}
+}
+
+// ── โหลดข้อมูลจาก Google Sheets ──
+async function loadFromSheets(){
+  if(!S.sheetsUrl) return false;
   try{
-    localStorage.setItem('hr5_set',JSON.stringify(S));
-    localStorage.setItem('hr5_accts',JSON.stringify(ACCOUNTS));
-    localStorage.setItem('hr5_emp',JSON.stringify(EMP));
-    localStorage.setItem('hr5_crit',JSON.stringify(CRIT));
-    localStorage.setItem('hr5_eval',JSON.stringify(EVALS));
+    showLoading(true);
+    const res = await fetch(S.sheetsUrl+'?action=getData', {method:'GET',mode:'no-cors'});
+    // no-cors ไม่ return body — ใช้ fetch ด้วย cors แทน
+    const res2 = await fetch(S.sheetsUrl+'?action=getData');
+    const data = await res2.json();
+    if(data.error) throw new Error(data.error);
+    // Config
+    if(data.config){
+      const c = data.config;
+      S.company = c.company || S.company;
+      S.abbr = c.abbr || S.abbr;
+      S.themeIdx = Number(c.themeIdx)||0;
+      if(c.depts) S.depts = c.depts.split(',').filter(Boolean);
+      if(c.ratingLabels) S.ratingLabels = c.ratingLabels.split(',');
+    }
+    if(data.employees && data.employees.length) EMP = data.employees;
+    if(data.criteria && data.criteria.length) CRIT = data.criteria;
+    if(data.accounts && data.accounts.length) ACCOUNTS = data.accounts;
+    if(data.evals) EVALS = data.evals;
+    showLoading(false);
+    return true;
+  }catch(e){
+    showLoading(false);
+    return false;
+  }
+}
+
+// ── ส่งข้อมูลไป Sheets ──
+async function pushToSheets(action, data){
+  if(!S.sheetsUrl) return;
+  try{
+    const url = S.sheetsUrl+'?action='+action+'&data='+encodeURIComponent(JSON.stringify(data));
+    await fetch(url);
   }catch(e){}
+}
+
+function showLoading(show){
+  let el = document.getElementById('loading-bar');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'loading-bar';
+    el.style.cssText='position:fixed;top:0;left:0;right:0;height:3px;background:var(--blue2);z-index:9999;transition:opacity 0.3s';
+    document.body.appendChild(el);
+  }
+  el.style.opacity = show ? '1' : '0';
 }
 
 function RL(n){return S.ratingLabels?.[n]||DEF_RL[n]||''}
@@ -417,11 +463,18 @@ function quickLogin(username){
   document.getElementById('l-pass').focus();
 }
 
-function doLogin(){
+async function doLogin(){
   const u=document.getElementById('l-user').value.trim();
   const p=document.getElementById('l-pass').value.trim();
-  const acct=ACCOUNTS.find(a=>a.username===u&&a.password===p);
   const err=document.getElementById('login-err');
+  // โหลดข้อมูลจาก Sheets ก่อน login
+  if(S.sheetsUrl){
+    const btn=document.querySelector('.login-btn');
+    btn.textContent='กำลังโหลด...';btn.disabled=true;
+    await loadFromSheets();
+    btn.textContent='เข้าสู่ระบบ';btn.disabled=false;
+  }
+  const acct=ACCOUNTS.find(a=>a.username===u&&a.password===p);
   if(!acct){err.style.display='block';return;}
   err.style.display='none';
   currentUser=acct;
@@ -667,21 +720,26 @@ function saveEval(eid){
   save();
   // ── ส่งไป Google Sheets ──
   if(S.sheetsUrl){
-    const params=new URLSearchParams({
-      date:evalAt.toLocaleDateString('th-TH'),
-      month:MONTHS[now.getMonth()]+' '+(now.getFullYear()+543),
+    const params={
+      monthKey:monthKey,
       empId:e.id,
       empName:e.name,
       dept:e.dept,
       evaluatorName:currentUser?.displayName||'-',
+      evaluatorUsername:currentUser?.username||'-',
+      evaluatedAt:evalAt.toISOString(),
+      scores:JSON.stringify(EVALS[monthKey][eid].scores),
+      date:evalAt.toLocaleDateString('th-TH'),
+      month:MONTHS[now.getMonth()]+' '+(now.getFullYear()+543),
       skill:skillAvg,
       beh:behAvg,
       avg:avg
-    });
+    };
     showSyncStatus('กำลังส่งข้อมูลไป Google Sheets...');
-    fetch(S.sheetsUrl+'?'+params.toString(),{method:'GET',mode:'no-cors'})
+    const qs = Object.keys(params).map(k=>k+'='+encodeURIComponent(params[k])).join('&');
+    fetch(S.sheetsUrl+'?action=saveEval&'+qs,{method:'GET',mode:'no-cors'})
       .then(()=>showSyncStatus('✅ ส่งข้อมูลเข้า Google Sheets เรียบร้อย',true))
-      .catch(()=>showSyncStatus('⚠️ เชื่อมต่อ Sheets ไม่ได้ (ข้อมูลบันทึกในเครื่องแล้ว)',false,true));
+      .catch(()=>showSyncStatus('⚠️ เชื่อมต่อ Sheets ไม่ได้',false,true));
   }
   cm('m-eval');go('evaluate');
 }
@@ -748,9 +806,16 @@ function addEmp(){
   const dept=document.getElementById('ei-dept').value;
   if(!id||!name){alert('กรุณากรอกข้อมูลให้ครบ');return;}
   if(EMP.find(e=>e.id===id)){alert('รหัสพนักงานซ้ำ');return;}
-  EMP.push({id,name,dept});save();cm('m-emp');go('employees');
+  EMP.push({id,name,dept});save();
+  if(S.sheetsUrl) pushToSheets('saveEmployees', EMP);
+  cm('m-emp');go('employees');
 }
-function delEmp(eid){if(!confirm('ยืนยันลบพนักงาน?'))return;EMP=EMP.filter(e=>e.id!==eid);save();go('employees');}
+function delEmp(eid){
+  if(!confirm('ยืนยันลบพนักงาน?'))return;
+  EMP=EMP.filter(e=>e.id!==eid);save();
+  if(S.sheetsUrl) pushToSheets('saveEmployees', EMP);
+  go('employees');
+}
 function resetOneScore(eid,name){
   if(!confirm(`ยืนยันรีเซตคะแนนของ "${name}" ?`))return;
   if(EVALS[monthKey])delete EVALS[monthKey][eid];
@@ -808,9 +873,16 @@ function addCrit(){
   const dept=document.getElementById('ci-dept').value;
   if(!name){alert('กรุณาใส่ชื่อหัวข้อ');return;}
   const newId=CRIT.length?Math.max(...CRIT.map(c=>c.id))+1:1;
-  CRIT.push({id:newId,dept,cat,name});save();selDept=dept;cm('m-crit');go('deptcrit');
+  CRIT.push({id:newId,dept,cat,name});save();
+  if(S.sheetsUrl) pushToSheets('saveCriteria', CRIT);
+  selDept=dept;cm('m-crit');go('deptcrit');
 }
-function delCrit(id){if(!confirm('ยืนยันลบหัวข้อนี้?'))return;CRIT=CRIT.filter(c=>c.id!==id);save();go('deptcrit');}
+function delCrit(id){
+  if(!confirm('ยืนยันลบหัวข้อนี้?'))return;
+  CRIT=CRIT.filter(c=>c.id!==id);save();
+  if(S.sheetsUrl) pushToSheets('saveCriteria', CRIT);
+  go('deptcrit');
+}
 
 /* ── REPORT ── */
 function pageReport(){
@@ -905,12 +977,16 @@ function addAcct(){
   if(!u||!p||!dn){alert('กรุณากรอกข้อมูลให้ครบ');return;}
   if(ACCOUNTS.find(a=>a.username===u)){alert('ชื่อผู้ใช้นี้มีแล้ว');return;}
   ACCOUNTS.push({username:u,password:p,role,displayName:dn,dept});
-  save();cm('m-acct');renderLoginUserList();go('accounts');
+  save();
+  if(S.sheetsUrl) pushToSheets('saveAccounts', ACCOUNTS);
+  cm('m-acct');renderLoginUserList();go('accounts');
 }
 function delAcct(u){
   if(!confirm('ยืนยันลบบัญชี?'))return;
   ACCOUNTS=ACCOUNTS.filter(a=>a.username!==u);
-  save();renderLoginUserList();go('accounts');
+  save();
+  if(S.sheetsUrl) pushToSheets('saveAccounts', ACCOUNTS);
+  renderLoginUserList();go('accounts');
 }
 
 /* ── SETTINGS ── */
@@ -984,11 +1060,20 @@ function pageSettings(){
 </div>`;
 }
 
-function saveSheetUrl(){
+async function saveSheetUrl(){
   const url=document.getElementById('sheets-url')?.value.trim();
   if(!url){alert('กรุณาใส่ URL');return;}
   if(!url.includes('script.google.com')){alert('URL ไม่ถูกต้อง\nต้องเป็น URL จาก Google Apps Script\nขึ้นต้นด้วย https://script.google.com/...');return;}
-  S.sheetsUrl=url;save();showSyncStatus('✅ บันทึก URL เรียบร้อย',true);go('settings');
+  S.sheetsUrl=url;save();
+  showSyncStatus('กำลังโหลดข้อมูลจาก Google Sheets...');
+  const ok = await loadFromSheets();
+  if(ok){
+    showSyncStatus('✅ เชื่อมต่อสำเร็จ! โหลดข้อมูลเรียบร้อย',true);
+    applyBranding();
+  } else {
+    showSyncStatus('⚠️ เชื่อมต่อได้ แต่โหลดข้อมูลไม่สำเร็จ — ตรวจสอบ CORS ใน Apps Script',false,true);
+  }
+  go('settings');
 }
 function testSheet(){
   if(!S.sheetsUrl){alert('กรุณาใส่ URL ก่อน');return;}
@@ -999,7 +1084,16 @@ function testSheet(){
 }
 function addDept(){const v=document.getElementById('nd-new')?.value.trim();if(!v)return;if(S.depts.includes(v)){alert('มีแผนกนี้แล้ว');return;}S.depts.push(v);save();go('settings');}
 function delDept(d){if(EMP.some(e=>e.dept===d)&&!confirm(`มีพนักงานในแผนก "${d}" ต้องการลบหรือไม่?`))return;S.depts=S.depts.filter(x=>x!==d);save();go('settings');}
-function resetAll(){if(!confirm('ยืนยันรีเซตข้อมูลทั้งหมด?'))return;localStorage.clear();S={...DEF_SET,depts:[...DEF_SET.depts],ratingLabels:[...DEF_RL],sheetsUrl:''};ACCOUNTS=DEF_ACCOUNTS.map(a=>({...a}));EMP=DEF_EMP.map(e=>({...e}));CRIT=DEF_CRIT.map(c=>({...c}));EVALS={};applyBranding();go('dashboard');}
+function resetAll(){
+  if(!confirm('ยืนยันรีเซตข้อมูลทั้งหมด?'))return;
+  localStorage.clear();
+  S={...DEF_SET,depts:[...DEF_SET.depts],ratingLabels:[...DEF_RL],sheetsUrl:''};
+  ACCOUNTS=DEF_ACCOUNTS.map(a=>({...a}));
+  EMP=DEF_EMP.map(e=>({...e}));
+  CRIT=DEF_CRIT.map(c=>({...c}));
+  EVALS={};
+  applyBranding();go('dashboard');
+}
 
 function om(id){document.getElementById(id).style.display='flex';}
 function cm(id){const el=document.getElementById(id);if(el)el.style.display='none';}
