@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบประเมินพนักงาน</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=Prompt:wght@500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#1a2744;--blue2:#4c6ef5;--green:#0ca678;--red:#f03e3e;--amber:#f59f00;--border:#e9ecef;--text:#212529;--muted:#868e96;--sidebar:230px}
+body{font-family:'Sarabun',sans-serif;background:#f1f3f9;color:var(--text);min-height:100vh;font-size:16px}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a2744 0%,#2c3e7a 100%);padding:20px}
+.login-box{background:#fff;border-radius:20px;padding:40px 36px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,0.25)}
+.login-logo{width:56px;height:56px;background:var(--blue2);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px}
+.login-title{font-family:'Prompt',sans-serif;font-size:20px;font-weight:700;color:var(--navy);text-align:center;margin-bottom:4px}
+.login-sub{font-size:14px;color:var(--muted);text-align:center;margin-bottom:28px}
+.login-label{font-size:15px;font-weight:600;color:var(--navy);margin-bottom:6px;display:block}
+.login-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Sarabun',sans-serif;font-size:15px;color:var(--text);margin-bottom:14px}
+.login-input:focus{outline:none;border-color:var(--blue2)}
+.login-btn{width:100%;padding:13px;border-radius:10px;border:none;background:var(--blue2);color:#fff;font-family:'Sarabun',sans-serif;font-size:16px;font-weight:600;cursor:pointer;margin-top:4px}
+.login-err{background:#fff5f5;color:var(--red);border-radius:8px;padding:10px 14px;font-size:14px;margin-bottom:14px;display:none}
+.login-users{margin-top:20px;background:#f8f9fa;border-radius:12px;padding:16px;font-size:13px}
+.login-users-title{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.login-user-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background 0.1s;margin-bottom:4px;border:1px solid transparent}
+.login-user-item:hover{background:#e7f0ff;border-color:#c5d5ff}
+.login-user-item:last-child{margin-bottom:0}
+.lu-role{font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600;white-space:nowrap}
+.lu-role-admin{background:#e7f0ff;color:var(--blue2)}
+.lu-role-dept{background:#e6fcf5;color:var(--green)}
+.lu-name{font-size:14px;font-weight:600;color:var(--navy)}
+.lu-dept{font-size:12px;color:var(--muted)}
+
+/* LAYOUT */
+.app{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar);background:linear-gradient(160deg,#1a2744 0%,#2c3e7a 100%);min-height:100vh;display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:50;transition:transform 0.3s}
+.sidebar-brand{padding:18px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,0.1)}
+.brand-icon{width:38px;height:38px;background:var(--blue2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.brand-name{font-family:'Prompt',sans-serif;font-size:13px;font-weight:600;color:#fff;line-height:1.4}
+.brand-name small{font-size:11px;color:rgba(255,255,255,0.5);font-weight:400;display:block}
+.nav-section{padding:12px 10px 4px;font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:0.08em;text-transform:uppercase;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,0.7);font-size:14px;margin:1px 8px;transition:all 0.15s;-webkit-tap-highlight-color:transparent}
+.nav-item:hover{background:rgba(255,255,255,0.08);color:#fff}
+.nav-item.active{background:var(--blue2);color:#fff;font-weight:600}
+.nav-icon{font-size:16px;min-width:22px;text-align:center}
+.sidebar-footer{margin-top:auto;padding:12px 8px;border-top:1px solid rgba(255,255,255,0.1)}
+.user-card{padding:8px 10px;display:flex;align-items:center;gap:10px}
+.user-av{width:34px;height:34px;border-radius:50%;background:var(--blue2);display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:700;flex-shrink:0}
+.user-name{font-size:13px;color:#fff;font-weight:600}
+.user-role{font-size:11px;color:rgba(255,255,255,0.5)}
+.dept-badge{display:inline-block;background:rgba(255,255,255,0.15);color:#fff;font-size:10px;padding:2px 7px;border-radius:6px;margin-top:2px}
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.page-title{font-family:'Prompt',sans-serif;font-size:19px;font-weight:700;color:var(--navy)}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.month-lbl{font-size:14px;color:var(--muted)}
+.logout-btn{padding:7px 14px;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-size:13px;cursor:pointer;color:var(--muted);font-family:'Sarabun',sans-serif}
+.logout-btn:hover{background:#fff5f5;color:var(--red);border-color:#ffc9c9}
+.content{padding:20px 24px;flex:1}
+.hamburger{display:none;cursor:pointer;font-size:22px;width:38px;height:38px;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--border)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:49}
+.overlay.open{display:block}
+
+/* COMPONENTS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat-card{background:#fff;border-radius:12px;padding:16px;border:1px solid var(--border);display:flex;align-items:center;gap:14px}
+.stat-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.si-blue{background:#e7f0ff;color:var(--blue2)}.si-green{background:#e6fcf5;color:var(--green)}.si-amber{background:#fff9db;color:var(--amber)}.si-red{background:#fff5f5;color:var(--red)}
+.stat-num{font-family:'Prompt',sans-serif;font-size:24px;font-weight:700;color:var(--navy);line-height:1}
+.stat-lbl{font-size:13px;color:var(--muted);margin-top:2px}
+.panels-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.panel{background:#fff;border-radius:12px;border:1px solid var(--border);overflow:hidden}
+.panel-header{padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.panel-title{font-size:14px;font-weight:600;color:var(--navy);display:flex;align-items:center;gap:7px}
+.pdot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.pdot-red{background:var(--red)}.pdot-green{background:var(--green)}.pdot-blue{background:var(--blue2)}.pdot-amber{background:var(--amber)}
+.link-btn{font-size:13px;color:var(--blue2);cursor:pointer;font-weight:500}
+.ptable{width:100%;border-collapse:collapse}
+.ptable th{padding:8px 14px;color:#444;font-weight:600;text-align:left;border-bottom:1px solid var(--border);background:#f5f7ff;font-size:13px}
+.ptable td{padding:9px 14px;border-bottom:1px solid #f0f0f0;vertical-align:middle;font-size:14px}
+.ptable tr:last-child td{border-bottom:none}
+.ptable tr:hover td{background:#f9fafb}
+.badge{padding:3px 9px;border-radius:20px;font-size:12px;font-weight:500;white-space:nowrap}
+.badge-red{background:#fff5f5;color:var(--red)}.badge-green{background:#e6fcf5;color:var(--green)}.badge-blue{background:#e7f0ff;color:var(--blue2)}.badge-amber{background:#fff9db;color:var(--amber)}
+.action-bar{background:#fff;border-radius:12px;border:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.abtn{padding:9px 16px;border-radius:8px;border:none;font-family:'Sarabun',sans-serif;font-size:14px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;-webkit-tap-highlight-color:transparent}
+.abtn:active{transform:scale(0.97)}
+.abtn-blue{background:var(--blue2);color:#fff}.abtn-green{background:var(--green);color:#fff}.abtn-teal{background:#0891b2;color:#fff}.abtn-purple{background:#7c3aed;color:#fff}.abtn-red{background:var(--red);color:#fff}
+.page-header{margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.page-h{font-family:'Prompt',sans-serif;font-size:21px;font-weight:700;color:var(--navy)}
+.tcard{background:#fff;border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:14px}
+.dtable{width:100%;border-collapse:collapse}
+.dtable th{padding:11px 16px;color:#444;font-weight:600;text-align:left;border-bottom:1px solid var(--border);background:#f5f7ff;font-size:13px}
+.dtable td{padding:11px 16px;border-bottom:1px solid #f0f0f0;vertical-align:middle;font-size:14px}
+.dtable tr:last-child td{border-bottom:none}
+.dtable tr:hover td{background:#f9fafb}
+.search-bar{padding:9px 13px;border:1.5px solid var(--border);border-radius:8px;font-family:'Sarabun',sans-serif;font-size:14px;color:var(--text)}
+.search-bar:focus{outline:none;border-color:var(--blue2)}
+.back-btn{padding:8px 14px;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-family:'Sarabun',sans-serif;font-size:14px;cursor:pointer;color:var(--muted)}
+.submit-btn{padding:11px 24px;border-radius:8px;border:none;background:var(--blue2);color:#fff;font-family:'Sarabun',sans-serif;font-size:15px;font-weight:600;cursor:pointer}
+.pbar{height:6px;background:#e9ecef;border-radius:3px;overflow:hidden;width:80px;margin-top:4px}
+.pbar-fill{height:100%;background:var(--blue2);border-radius:3px}
+.ename{font-size:14px;font-weight:600;color:var(--navy)}
+.esub{font-size:12px;color:var(--muted)}
+.code{font-family:monospace;font-size:14px;font-weight:700;color:var(--navy)}
+
+/* RATING */
+.crit-block{border-bottom:1px solid #eee;padding:10px 0}
+.crit-block:last-child{border-bottom:none}
+.crit-q{font-size:17px;font-weight:700;color:#1a2744;margin-bottom:10px;line-height:1.5}
+.rating-row{display:flex;gap:6px;flex-wrap:wrap}
+.rbtn{min-width:60px;height:68px;border-radius:12px;border:2px solid transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:all 0.15s;flex:1;max-width:100px;-webkit-tap-highlight-color:transparent;opacity:0.45}
+.rbtn:active{transform:scale(0.95)}
+.rbtn .rn{font-size:22px;font-weight:700;line-height:1}
+.rbtn .rl{font-size:10px;text-align:center;line-height:1.3;padding:0 3px;font-weight:500}
+.rbtn.c1{background:#ffecec;border-color:#f03e3e}.rbtn.c1 .rn{color:#c92a2a}.rbtn.c1 .rl{color:#c92a2a}
+.rbtn.c2{background:#fff4e0;border-color:#f59f00}.rbtn.c2 .rn{color:#d9480f}.rbtn.c2 .rl{color:#d9480f}
+.rbtn.c3{background:#e8f4fd;border-color:#4c9de8}.rbtn.c3 .rn{color:#1864ab}.rbtn.c3 .rl{color:#1864ab}
+.rbtn.c4{background:#e6fcf5;border-color:#0ca678}.rbtn.c4 .rn{color:#087f5b}.rbtn.c4 .rl{color:#087f5b}
+.rbtn.c5{background:#edf2ff;border-color:#4c6ef5}.rbtn.c5 .rn{color:#3b5bdb}.rbtn.c5 .rl{color:#3b5bdb}
+.rbtn.sel{opacity:1;transform:scale(1.05);box-shadow:0 3px 10px rgba(0,0,0,0.15)}
+.rbtn:not(.sel):hover{opacity:0.75}
+.score-bar{background:#f1f3f9;border-radius:10px;padding:14px 18px;margin-top:14px;display:flex;align-items:center;justify-content:center;gap:20px;font-size:16px;flex-wrap:wrap}
+.csec-title{font-size:16px;font-weight:700;padding:8px 0 10px;border-bottom:1px solid var(--border);margin-bottom:2px;display:flex;align-items:center;gap:7px}
+
+/* MODAL */
+.moverlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:12px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:660px;margin-top:8px}
+.mhead{padding:15px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:#fafbff;border-radius:16px 16px 0 0;position:sticky;top:0;z-index:1}
+.mhead h3{font-family:'Prompt',sans-serif;font-size:16px;font-weight:600;color:var(--navy);display:flex;align-items:center;gap:8px}
+.mbody{padding:20px}
+.mfoot{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.xbtn{width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--muted)}
+.fg{margin-bottom:16px}
+.flbl{font-size:14px;font-weight:600;color:var(--navy);margin-bottom:7px;display:block}
+.finput,.fsel{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-family:'Sarabun',sans-serif;font-size:14px;color:var(--text);background:#fff;appearance:none}
+.finput:focus,.fsel:focus{outline:none;border-color:var(--blue2)}
+.swrap{position:relative}.sarrow{position:absolute;right:11px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);font-size:11px}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mini-inp{padding:9px 11px;border:1.5px solid var(--border);border-radius:8px;font-family:'Sarabun',sans-serif;font-size:14px;color:var(--text)}
+.mini-inp:focus{outline:none;border-color:var(--blue2)}
+
+/* SETTINGS */
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.scard{background:#fff;border-radius:12px;border:1px solid var(--border);overflow:hidden}
+.shead{padding:13px 16px;border-bottom:1px solid var(--border);font-size:15px;font-weight:600;color:var(--navy);display:flex;align-items:center;gap:7px;background:#fafbff}
+.srow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 16px;border-bottom:1px solid #f5f5f5;font-size:14px}
+.srow:last-child{border-bottom:none}
+.slbl{font-size:14px;font-weight:500;color:var(--navy)}
+.ssub{font-size:12px;color:var(--muted);margin-top:2px}
+.cswatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent}
+.cswatch.sel{border-color:#1a2744}
+.dept-tag{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;font-size:13px;margin:3px;background:#f1f3f9;border:1px solid var(--border);color:#444}
+.dtag-del{cursor:pointer;color:var(--muted);font-size:16px;line-height:1}
+.rlabel-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #f5f5f5}
+.rlabel-row:last-child{border-bottom:none}
+.rlabel-num{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0}
+.rpt-dept-header{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:#f5f7ff}
+.rpt-dept-name{font-size:17px;font-weight:700;color:#1a2744;display:flex;align-items:center;gap:8px}
+.rpt-dept-avg{font-size:17px;font-weight:700;color:var(--blue2)}
+
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .panels-grid,.sgrid{grid-template-columns:1fr}
+  .fg2{grid-template-columns:1fr}
+  .topbar,.content{padding-left:14px;padding-right:14px}
+  .hamburger{display:flex}
+  .rbtn{min-width:52px;height:54px}.rbtn .rn{font-size:20px}
+}
+</style>
+</head>
+<body>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- LOGIN PAGE -->
+<div id="login-page">
+  <div class="login-wrap">
+    <div class="login-box">
+      <div class="login-logo" id="ll-icon">👔</div>
+      <div class="login-title" id="ll-title">ระบบประเมินพนักงาน</div>
+      <div class="login-sub">กรุณาเข้าสู่ระบบเพื่อดำเนินการ</div>
+      <div class="login-err" id="login-err">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
+      <label class="login-label">ชื่อผู้ใช้</label>
+      <input class="login-input" id="l-user" placeholder="username" autocomplete="username">
+      <label class="login-label">รหัสผ่าน</label>
+      <input class="login-input" id="l-pass" type="password" placeholder="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="login-btn" onclick="doLogin()">เข้าสู่ระบบ</button>
+      <div class="login-users">
+        <div class="login-users-title">👤 ผู้ใช้งานระบบ — คลิกเพื่อเลือก</div>
+        <div id="login-user-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP PAGE -->
+<div id="app-page" style="display:none">
+  <div class="app">
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon" id="s-logo">👔</div>
+        <div class="brand-name" id="s-name">ระบบประเมิน<small>พนักงาน</small></div>
+      </div>
+      <div class="nav-section">เมนูหลัก</div>
+      <div class="nav-item active" onclick="go('dashboard',this)"><span class="nav-icon">📊</span> Dashboard</div>
+      <div class="nav-item" onclick="go('evaluate',this)"><span class="nav-icon">⭐</span> ประเมินผล</div>
+      <div class="nav-item" onclick="go('employees',this)"><span class="nav-icon">👥</span> พนักงาน</div>
+      <div class="nav-item admin-only" onclick="go('deptcrit',this)"><span class="nav-icon">📋</span> หัวข้อแต่ละแผนก</div>
+      <div class="nav-item admin-only" onclick="go('report',this)"><span class="nav-icon">📈</span> รายงานรวม</div>
+      <div class="nav-item admin-only" onclick="go('accounts',this)"><span class="nav-icon">🔑</span> จัดการบัญชี</div>
+      <div class="nav-item admin-only" onclick="go('settings',this)"><span class="nav-icon">⚙️</span> ตั้งค่าระบบ</div>
+      <div class="nav-section">ทั่วไป</div>
+      <div class="nav-item" style="color:#ff9999" onclick="doLogout()"><span class="nav-icon">🚪</span> ออกจากระบบ</div>
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="user-av" id="s-av">HR</div>
+          <div>
+            <div class="user-name" id="s-uname">-</div>
+            <div class="user-role" id="s-urole">-</div>
+            <div class="dept-badge" id="s-udept" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="main">
+      <div class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="hamburger" onclick="toggleSidebar()">☰</div>
+          <div class="page-title" id="page-title">Dashboard</div>
+        </div>
+        <div class="topbar-right">
+          <div class="month-lbl" id="month-lbl"></div>
+          <button class="logout-btn" onclick="doLogout()">ออกจากระบบ</button>
+        </div>
+      </div>
+      <div class="content" id="content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add Employee -->
+<div class="moverlay" id="m-emp" style="display:none">
+  <div class="modal" style="max-width:480px">
+    <div class="mhead"><h3>👤 เพิ่มพนักงาน</h3><div class="xbtn" onclick="cm('m-emp')">✕</div></div>
+    <div class="mbody">
+      <div class="fg"><label class="flbl">รหัสพนักงาน *</label><input class="finput" id="ei-id" placeholder="เช่น 37013"></div>
+      <div class="fg"><label class="flbl">ชื่อ-นามสกุล *</label><input class="finput" id="ei-name" placeholder="ชื่อ นามสกุล"></div>
+      <div class="fg"><label class="flbl">แผนก</label><div class="swrap"><select class="fsel" id="ei-dept"></select><div class="sarrow">▼</div></div></div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:4px">
+        <button class="back-btn" onclick="cm('m-emp')">ยกเลิก</button>
+        <button class="submit-btn" onclick="addEmp()">✓ บันทึก</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add Criteria -->
+<div class="moverlay" id="m-crit" style="display:none">
+  <div class="modal" style="max-width:480px">
+    <div class="mhead"><h3>📋 เพิ่มหัวข้อประเมิน</h3><div class="xbtn" onclick="cm('m-crit')">✕</div></div>
+    <div class="mbody">
+      <div class="fg"><label class="flbl">ชื่อหัวข้อ *</label><input class="finput" id="ci-name" placeholder="ชื่อหัวข้อ"></div>
+      <div class="fg"><label class="flbl">หมวด</label><div class="swrap"><select class="fsel" id="ci-cat"><option value="ฝีมือ">ฝีมือและคุณภาพงาน</option><option value="พฤติกรรม">พฤติกรรม</option></select><div class="sarrow">▼</div></div></div>
+      <div class="fg"><label class="flbl">สำหรับแผนก</label><div class="swrap"><select class="fsel" id="ci-dept"></select><div class="sarrow">▼</div></div></div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:4px">
+        <button class="back-btn" onclick="cm('m-crit')">ยกเลิก</button>
+        <button class="submit-btn" onclick="addCrit()">✓ บันทึก</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add Account -->
+<div class="moverlay" id="m-acct" style="display:none">
+  <div class="modal" style="max-width:480px">
+    <div class="mhead"><h3>🔑 เพิ่มบัญชีผู้ใช้</h3><div class="xbtn" onclick="cm('m-acct')">✕</div></div>
+    <div class="mbody">
+      <div class="fg"><label class="flbl">ชื่อผู้ใช้ (username) *</label><input class="finput" id="ai-user" placeholder="เช่น dept_press"></div>
+      <div class="fg2">
+        <div class="fg"><label class="flbl">รหัสผ่าน *</label><input class="finput" id="ai-pass" type="password" placeholder="รหัสผ่าน"></div>
+        <div class="fg"><label class="flbl">ชื่อแสดง *</label><input class="finput" id="ai-dname" placeholder="เช่น หัวหน้าแผนก A"></div>
+      </div>
+      <div class="fg"><label class="flbl">บทบาท</label><div class="swrap"><select class="fsel" id="ai-role" onchange="toggleDeptSel()"><option value="dept">หัวหน้าแผนก</option><option value="admin">Admin</option></select><div class="sarrow">▼</div></div></div>
+      <div class="fg" id="ai-dept-wrap"><label class="flbl">แผนกที่ดูแล</label><div class="swrap"><select class="fsel" id="ai-dept"></select><div class="sarrow">▼</div></div></div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:4px">
+        <button class="back-btn" onclick="cm('m-acct')">ยกเลิก</button>
+        <button class="submit-btn" onclick="addAcct()">✓ บันทึก</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const MONTHS=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const now=new Date();
+const monthKey=now.getFullYear()+'-'+now.getMonth();
+
+const THEMES=[
+  {name:'น้ำเงิน',accent:'#4c6ef5',dark:'#1a2744'},
+  {name:'เขียว',accent:'#0ca678',dark:'#085041'},
+  {name:'ม่วง',accent:'#7c3aed',dark:'#4c1d95'},
+  {name:'แดง',accent:'#f03e3e',dark:'#7f1d1d'},
+  {name:'ส้ม',accent:'#f59f00',dark:'#78350f'},
+];
+const DEF_RL=['','ต้องพัฒนา','พอใช้ได้','ผ่านเกณฑ์','ดีมาก','ยอดเยี่ยม'];
+const RC=['','c1','c2','c3','c4','c5'];
+
+const DEF_SET={company:'ระบบประเมินพนักงาน',abbr:'HR',themeIdx:0,depts:['1สี','4สี','5สี'],ratingLabels:[...DEF_RL],sheetsUrl:''};
+const DEF_ACCOUNTS=[
+  {username:'admin',password:'1234',role:'admin',displayName:'ผู้ดูแลระบบ',dept:null},
+  {username:'dept_1si',password:'1234',role:'dept',displayName:'หัวหน้าแผนก 1สี',dept:'1สี'},
+  {username:'dept_4si',password:'1234',role:'dept',displayName:'หัวหน้าแผนก 4สี',dept:'4สี'},
+  {username:'dept_5si',password:'1234',role:'dept',displayName:'หัวหน้าแผนก 5สี',dept:'5สี'},
+];
+const DEF_EMP=[
+  {id:'37001',name:'สมชาย ใจดี',dept:'4สี'},{id:'37002',name:'วิชัย มั่นคง',dept:'1สี'},
+  {id:'37003',name:'ประเสริฐ สุขใส',dept:'5สี'},{id:'37004',name:'สุรชัย พงษ์ดี',dept:'4สี'},
+  {id:'37005',name:'มานะ รักงาน',dept:'1สี'},{id:'37006',name:'ธนวัฒน์ สว่าง',dept:'4สี'},
+  {id:'37007',name:'กิตติ ศรีสุข',dept:'5สี'},{id:'37008',name:'อนุชา ทองดี',dept:'1สี'},
+];
+const DEF_CRIT=[
+  {id:1,dept:'1สี',cat:'ฝีมือ',name:'ความพร้อมของเครื่อง 1สี ก่อนเริ่มงาน'},
+  {id:2,dept:'1สี',cat:'ฝีมือ',name:'การตรวจเช็คน้ำหมึก 1 สี'},
+  {id:3,dept:'1สี',cat:'ฝีมือ',name:'คุณภาพงานพิมพ์ 1 สี'},
+  {id:4,dept:'1สี',cat:'พฤติกรรม',name:'การมาทำงานตรงเวลา'},
+  {id:5,dept:'1สี',cat:'พฤติกรรม',name:'ความรับผิดชอบต่องาน'},
+  {id:6,dept:'4สี',cat:'ฝีมือ',name:'การตั้งค่าสี 4 สี ได้ถูกต้อง'},
+  {id:7,dept:'4สี',cat:'ฝีมือ',name:'ความแม่นยำการพิมพ์สี 4 สี'},
+  {id:8,dept:'4สี',cat:'ฝีมือ',name:'การแก้ปัญหาเครื่อง 4 สี'},
+  {id:9,dept:'4สี',cat:'พฤติกรรม',name:'การมาทำงานตรงเวลา'},
+  {id:10,dept:'4สี',cat:'พฤติกรรม',name:'ความรับผิดชอบต่องาน'},
+  {id:11,dept:'5สี',cat:'ฝีมือ',name:'การควบคุมสีที่ 5 (เคลือบ/ฟอยล์)'},
+  {id:12,dept:'5สี',cat:'ฝีมือ',name:'คุณภาพงานพิมพ์พิเศษ 5 สี'},
+  {id:13,dept:'5สี',cat:'ฝีมือ',name:'การดูแลรักษาเครื่อง 5 สี'},
+  {id:14,dept:'5สี',cat:'พฤติกรรม',name:'การมาทำงานตรงเวลา'},
+  {id:15,dept:'5สี',cat:'พฤติกรรม',name:'ความรับผิดชอบต่องาน'},
+];
+
+let S=JSON.parse(localStorage.getItem('hr5_set')||'null')||{...DEF_SET,depts:[...DEF_SET.depts],ratingLabels:[...DEF_RL],sheetsUrl:''};
+let ACCOUNTS=JSON.parse(localStorage.getItem('hr5_accts')||'null')||DEF_ACCOUNTS.map(a=>({...a}));
+let EMP=JSON.parse(localStorage.getItem('hr5_emp')||'null')||DEF_EMP.map(e=>({...e}));
+let CRIT=JSON.parse(localStorage.getItem('hr5_crit')||'null')||DEF_CRIT.map(c=>({...c}));
+let EVALS=JSON.parse(localStorage.getItem('hr5_eval')||'{}');
+// EVALS[monthKey][empId] = {scores:{critId:val,...}, evaluatorName:'...'}
+let currentUser=null;
+
+function save(){
+  try{
+    localStorage.setItem('hr5_set',JSON.stringify(S));
+    localStorage.setItem('hr5_accts',JSON.stringify(ACCOUNTS));
+    localStorage.setItem('hr5_emp',JSON.stringify(EMP));
+    localStorage.setItem('hr5_crit',JSON.stringify(CRIT));
+    localStorage.setItem('hr5_eval',JSON.stringify(EVALS));
+  }catch(e){}
+}
+
+function RL(n){return S.ratingLabels?.[n]||DEF_RL[n]||''}
+function th(){return THEMES[S.themeIdx]||THEMES[0]}
+function isAdmin(){return currentUser?.role==='admin'}
+function myDept(){return currentUser?.dept||null}
+function visibleDepts(){return isAdmin()?S.depts:[myDept()].filter(Boolean)}
+function visibleEmp(){return isAdmin()?EMP:EMP.filter(e=>e.dept===myDept())}
+function deptCrit(dept){return CRIT.filter(c=>c.dept===dept)}
+function getEvaluatorName(eid){return EVALS[monthKey]?.[eid]?.evaluatorName||'-'}
+
+function applyBranding(){
+  const t=th();
+  document.getElementById('s-name').innerHTML=S.company+'<small>ระบบประเมินพนักงาน</small>';
+  const logo=document.getElementById('s-logo');logo.textContent=S.abbr||'HR';logo.style.background=t.accent;
+  document.documentElement.style.setProperty('--blue2',t.accent);
+  document.documentElement.style.setProperty('--navy',t.dark);
+  document.getElementById('month-lbl').textContent=MONTHS[now.getMonth()]+' '+(now.getFullYear()+543);
+  document.getElementById('ll-title').textContent=S.company||'ระบบประเมินพนักงาน';
+  document.getElementById('ll-icon').textContent=S.abbr||'HR';
+  renderLoginUserList();
+}
+
+function renderLoginUserList(){
+  const el=document.getElementById('login-user-list');
+  if(!el)return;
+  el.innerHTML=ACCOUNTS.map(a=>`
+    <div class="login-user-item" onclick="quickLogin('${a.username}')">
+      <span class="lu-role ${a.role==='admin'?'lu-role-admin':'lu-role-dept'}">${a.role==='admin'?'Admin':'หัวหน้า'}</span>
+      <div style="flex:1">
+        <div class="lu-name">${a.displayName}</div>
+        ${a.dept?`<div class="lu-dept">แผนก ${a.dept}</div>`:'<div class="lu-dept">ดูแลทุกแผนก</div>'}
+      </div>
+      <span style="font-size:12px;color:var(--muted)">คลิกเพื่อเลือก →</span>
+    </div>`).join('');
+}
+
+function quickLogin(username){
+  document.getElementById('l-user').value=username;
+  document.getElementById('l-pass').focus();
+}
+
+function doLogin(){
+  const u=document.getElementById('l-user').value.trim();
+  const p=document.getElementById('l-pass').value.trim();
+  const acct=ACCOUNTS.find(a=>a.username===u&&a.password===p);
+  const err=document.getElementById('login-err');
+  if(!acct){err.style.display='block';return;}
+  err.style.display='none';
+  currentUser=acct;
+  document.getElementById('login-page').style.display='none';
+  document.getElementById('app-page').style.display='block';
+  document.getElementById('s-uname').textContent=acct.displayName;
+  document.getElementById('s-urole').textContent=acct.role==='admin'?'ผู้ดูแลระบบ':'หัวหน้าแผนก';
+  document.getElementById('s-av').textContent=acct.displayName.slice(0,2);
+  const deptEl=document.getElementById('s-udept');
+  if(acct.dept){deptEl.style.display='inline-block';deptEl.textContent='แผนก: '+acct.dept;}
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.display=isAdmin()?'flex':'none');
+  applyBranding();
+  go('dashboard',document.querySelector('.nav-item.active'));
+}
+
+function doLogout(){
+  currentUser=null;
+  document.getElementById('app-page').style.display='none';
+  document.getElementById('login-page').style.display='block';
+  document.getElementById('l-user').value='';document.getElementById('l-pass').value='';
+  renderLoginUserList();
+}
+
+function getScore(eid,dept){
+  const ev=EVALS[monthKey]?.[eid];if(!ev)return null;
+  const scores=ev.scores||ev;
+  const dc=deptCrit(dept);if(!dc.length)return null;
+  const scored=dc.filter(c=>scores[c.id]!=null);
+  if(!scored.length)return null;
+  const total=scored.reduce((a,c)=>a+scores[c.id],0);
+  const avg=Math.round((total/scored.length)/5*100*10)/10;
+  const sc=dc.filter(c=>c.cat==='ฝีมือ'&&scores[c.id]!=null);
+  const bc=dc.filter(c=>c.cat==='พฤติกรรม'&&scores[c.id]!=null);
+  const skillAvg=sc.length?Math.round(sc.reduce((a,c)=>a+scores[c.id],0)/sc.length*10)/10:0;
+  const behAvg=bc.length?Math.round(bc.reduce((a,c)=>a+scores[c.id],0)/bc.length*10)/10:0;
+  return{avg,skill:skillAvg,beh:behAvg};
+}
+
+let curPage='dashboard';
+function go(page,el){
+  curPage=page;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el)el.classList.add('active');
+  const titles={dashboard:'Dashboard',evaluate:'ประเมินผล',employees:'พนักงาน',deptcrit:'หัวข้อแต่ละแผนก',report:'รายงานรวม',accounts:'จัดการบัญชี',settings:'ตั้งค่าระบบ'};
+  document.getElementById('page-title').textContent=titles[page]||page;
+  const c=document.getElementById('content');
+  if(page==='dashboard')c.innerHTML=pageDash();
+  else if(page==='evaluate')c.innerHTML=pageEval();
+  else if(page==='employees')c.innerHTML=pageEmp();
+  else if(page==='deptcrit')c.innerHTML=pageDeptCrit();
+  else if(page==='report')c.innerHTML=pageReport();
+  else if(page==='accounts')c.innerHTML=pageAccounts();
+  else if(page==='settings')c.innerHTML=pageSettings();
+  if(window.innerWidth<=900)closeSidebar();
+}
+
+/* ── DASHBOARD ── */
+function pageDash(){
+  const t=th();
+  const vDepts=visibleDepts();
+  const vEmp=visibleEmp();
+  const evaluated=vEmp.filter(e=>EVALS[monthKey]?.[e.id]).length;
+  const pct=vEmp.length?Math.round(evaluated/vEmp.length*100):0;
+  const scored=vEmp.map(e=>({...e,s:getScore(e.id,e.dept)})).filter(e=>e.s).sort((a,b)=>b.s.avg-a.s.avg);
+  const avg=scored.length?Math.round(scored.reduce((a,e)=>a+e.s.avg,0)/scored.length*10)/10:'-';
+  return`
+<div class="stats-grid">
+  <div class="stat-card"><div class="stat-icon si-blue">👥</div><div><div class="stat-num">${vEmp.length}</div><div class="stat-lbl">พนักงาน${isAdmin()?'ทั้งหมด':'ในแผนก'}</div></div></div>
+  <div class="stat-card"><div class="stat-icon si-green">✅</div><div><div class="stat-num">${evaluated}</div><div class="stat-lbl">ประเมินแล้ว</div></div></div>
+  <div class="stat-card"><div class="stat-icon si-amber">⏳</div><div><div class="stat-num">${vEmp.length-evaluated}</div><div class="stat-lbl">รอประเมิน</div></div></div>
+  <div class="stat-card"><div class="stat-icon si-red">🏆</div><div><div class="stat-num">${avg}</div><div class="stat-lbl">คะแนนเฉลี่ย/100</div></div></div>
+</div>
+<div class="panels-grid">
+  <div class="panel">
+    <div class="panel-header"><div class="panel-title"><div class="pdot pdot-amber"></div>รอประเมิน</div><div class="link-btn" onclick="go('evaluate')">ไปประเมิน →</div></div>
+    <table class="ptable"><thead><tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th>สถานะ</th></tr></thead><tbody>
+      ${vEmp.filter(e=>!EVALS[monthKey]?.[e.id]).slice(0,5).map(e=>`<tr>
+        <td><span class="code">${e.id}</span></td>
+        <td><span class="ename">${e.name}</span></td>
+        <td><span class="badge badge-blue">${e.dept}</span></td>
+        <td><span class="badge badge-amber">รอ</span></td>
+      </tr>`).join('')}
+      ${vEmp.filter(e=>!EVALS[monthKey]?.[e.id]).length===0?`<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--muted)">✅ ประเมินครบทุกคนแล้ว</td></tr>`:''}
+    </tbody></table>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><div class="panel-title"><div class="pdot pdot-green"></div>คะแนนสูงสุด</div><div class="link-btn" onclick="go('report')">ดูรายงาน →</div></div>
+    <table class="ptable"><thead><tr><th>#</th><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th>คะแนน</th></tr></thead><tbody>
+      ${scored.slice(0,5).map((e,i)=>`<tr>
+        <td style="color:var(--muted);font-weight:700">${i+1}</td>
+        <td><span class="code">${e.id}</span></td>
+        <td><span class="ename">${e.name}</span></td>
+        <td style="color:var(--muted)">${e.dept}</td>
+        <td><span class="badge badge-green">${e.s.avg}</span></td>
+      </tr>`).join('')}
+      ${scored.length===0?`<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">ยังไม่มีผลประเมิน</td></tr>`:''}
+    </tbody></table>
+  </div>
+</div>
+<div class="panel" style="margin-bottom:20px">
+  <div class="panel-header"><div class="panel-title"><div class="pdot pdot-blue"></div>ความคืบหน้า ${MONTHS[now.getMonth()]} ${now.getFullYear()+543}</div><div style="font-size:16px;font-weight:700;color:var(--blue2)">${pct}%</div></div>
+  <div style="padding:16px">
+    <div style="height:8px;background:#e9ecef;border-radius:4px;overflow:hidden;margin-bottom:14px"><div style="height:100%;width:${pct}%;background:var(--blue2);border-radius:4px;transition:width 0.5s"></div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px">
+      ${vDepts.map(d=>{const g=vEmp.filter(e=>e.dept===d),ev=g.filter(e=>EVALS[monthKey]?.[e.id]).length,pp=g.length?Math.round(ev/g.length*100):0;return`<div style="background:#f8f9fa;border-radius:10px;padding:12px 14px"><div style="font-size:15px;font-weight:600;color:var(--navy);margin-bottom:3px">แผนก ${d}</div><div style="font-size:13px;color:var(--muted);margin-bottom:5px">${ev}/${g.length} คน · ${pp}%</div><div class="pbar"><div class="pbar-fill" style="width:${pp}%"></div></div></div>`;}).join('')}
+    </div>
+  </div>
+</div>
+<div class="action-bar">
+  <span style="font-size:14px;font-weight:600;color:var(--navy);margin-right:4px">⚡ ดำเนินการด่วน</span>
+  <button class="abtn abtn-blue" onclick="go('evaluate')">⭐ ประเมินพนักงาน</button>
+  ${isAdmin()?`<button class="abtn abtn-green" onclick="openAddEmp()">👤 เพิ่มพนักงาน</button><button class="abtn abtn-teal" onclick="go('deptcrit')">📋 จัดการหัวข้อ</button><button class="abtn abtn-purple" onclick="go('report')">📈 รายงานรวม</button>`:''}
+</div>`;
+}
+
+/* ── EVALUATE ── */
+function pageEval(){
+  const vEmp=visibleEmp();
+  const pending=vEmp.filter(e=>!EVALS[monthKey]?.[e.id]);
+  const done=vEmp.filter(e=>EVALS[monthKey]?.[e.id]);
+  return`
+<div class="panels-grid">
+  <div class="panel">
+    <div class="panel-header"><div class="panel-title"><div class="pdot pdot-amber"></div>รอประเมิน (${pending.length})</div></div>
+    <table class="ptable"><thead><tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th>หัวข้อ</th><th></th></tr></thead><tbody>
+      ${pending.map(e=>{const nc=deptCrit(e.dept).length;return`<tr>
+        <td><span class="code">${e.id}</span></td>
+        <td><span class="ename">${e.name}</span></td>
+        <td><span class="badge badge-blue">${e.dept}</span></td>
+        <td style="color:var(--muted)">${nc} ข้อ</td>
+        <td><button class="abtn abtn-blue" style="padding:6px 12px;font-size:13px" onclick="openEvalModal('${e.id}')">ประเมิน →</button></td>
+      </tr>`;}).join('')}
+      ${pending.length===0?`<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">✅ ประเมินครบทุกคนแล้ว</td></tr>`:''}
+    </tbody></table>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><div class="panel-title"><div class="pdot pdot-green"></div>ประเมินแล้ว (${done.length})</div></div>
+    <table class="ptable"><thead><tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th>คะแนน</th><th></th></tr></thead><tbody>
+      ${done.map(e=>{const s=getScore(e.id,e.dept);return`<tr>
+        <td><span class="code">${e.id}</span></td>
+        <td><span class="ename">${e.name}</span></td>
+        <td><span class="badge badge-blue">${e.dept}</span></td>
+        <td><span class="badge badge-green" style="font-weight:700">${s?s.avg:'-'}</span></td>
+        <td><button class="abtn" style="background:#f1f3f9;color:var(--navy);padding:5px 10px;font-size:12px" onclick="openEvalModal('${e.id}')">แก้ไข</button></td>
+      </tr>`;}).join('')}
+      ${done.length===0?`<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">ยังไม่มีผลประเมิน</td></tr>`:''}
+    </tbody></table>
+  </div>
+</div>`;
+}
+
+/* ── EVAL MODAL ── */
+window._te={};
+function openEvalModal(eid){
+  const e=EMP.find(x=>x.id===eid);
+  const existingScores=(EVALS[monthKey]?.[eid]?.scores)||{};
+  if(!window._te[eid])window._te[eid]={...existingScores};
+  const dc=deptCrit(e.dept);
+  const sc=dc.filter(c=>c.cat==='ฝีมือ'),bc=dc.filter(c=>c.cat==='พฤติกรรม');
+  if(!dc.length){alert(`แผนก ${e.dept} ยังไม่มีหัวข้อประเมิน\nกรุณาให้ Admin เพิ่มหัวข้อใน "หัวข้อแต่ละแผนก" ก่อนค่ะ`);return;}
+
+  function rBlock(c){
+    const val=window._te[eid]?.[c.id]||0;
+    return`<div class="crit-block">
+      <div class="crit-q">${c.name}</div>
+      <div class="rating-row" id="rr-${c.id}">
+        ${[1,2,3,4,5].map(n=>`<button class="rbtn c${n}${val===n?' sel':''}" onclick="setR(${c.id},${n},'${eid}',this)">
+          <span class="rn">${n}</span><span class="rl">${RL(n)}</span>
+        </button>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  const ex=document.getElementById('m-eval');if(ex)ex.remove();
+  const wrap=document.createElement('div');wrap.className='moverlay';wrap.id='m-eval';
+  wrap.innerHTML=`<div class="modal" style="max-width:660px">
+    <div class="mhead">
+      <h3>${e.name} — แผนก ${e.dept} <span style="font-size:13px;color:var(--muted);font-weight:400">(${e.id})</span></h3>
+      <div class="xbtn" onclick="cm('m-eval')">✕</div>
+    </div>
+    <div class="mbody">
+      <div style="background:#e8f0ff;border-radius:8px;padding:11px 15px;margin-bottom:16px;font-size:15px;color:#1a3a6b">
+        <b>วิธีให้คะแนน:</b> &nbsp; 1=${RL(1)} &nbsp; 2=${RL(2)} &nbsp; 3=${RL(3)} &nbsp; 4=${RL(4)} &nbsp; 5=${RL(5)}
+      </div>
+      ${sc.length?`<div class="csec-title" style="color:var(--blue2)">📐 ฝีมือและคุณภาพงาน (${sc.length} ข้อ)</div>${sc.map(c=>rBlock(c)).join('')}`:''}
+      ${bc.length?`<div class="csec-title" style="color:var(--green);margin-top:14px">🎯 พฤติกรรม (${bc.length} ข้อ)</div>${bc.map(c=>rBlock(c)).join('')}`:''}
+      <div class="score-bar" id="ev-preview">กรุณาให้คะแนนทุกหัวข้อ</div>
+      <div class="mfoot">
+        <button class="back-btn" onclick="cm('m-eval')">← ยกเลิก</button>
+        <button class="submit-btn" onclick="saveEval('${eid}')">✓ บันทึกผลการประเมิน</button>
+      </div>
+    </div>
+  </div>`;
+  wrap.addEventListener('click',ev=>{if(ev.target===wrap)cm('m-eval');});
+  document.body.appendChild(wrap);
+  updPrev(eid,e.dept);
+}
+
+function setR(cid,val,eid,btn){
+  if(!window._te[eid])window._te[eid]={};
+  window._te[eid][cid]=val;
+  const row=document.getElementById('rr-'+cid);
+  if(row){row.querySelectorAll('.rbtn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');}
+  updPrev(eid,EMP.find(x=>x.id===eid)?.dept);
+}
+
+function updPrev(eid,dept){
+  const data=window._te[eid]||{};
+  const dc=deptCrit(dept);
+  const scored=dc.filter(c=>data[c.id]!=null);
+  const el=document.getElementById('ev-preview');if(!el)return;
+  if(!scored.length){el.innerHTML='กรุณาให้คะแนนทุกหัวข้อ';return;}
+  const total=scored.reduce((a,c)=>a+data[c.id],0);
+  const avg=Math.round((total/scored.length)/5*100*10)/10;
+  const sc=dc.filter(c=>c.cat==='ฝีมือ'&&data[c.id]!=null);
+  const bc=dc.filter(c=>c.cat==='พฤติกรรม'&&data[c.id]!=null);
+  const sk=sc.length?Math.round(sc.reduce((a,c)=>a+data[c.id],0)/sc.length*10)/10:'—';
+  const bk=bc.length?Math.round(bc.reduce((a,c)=>a+data[c.id],0)/bc.length*10)/10:'—';
+  el.innerHTML=`ฝีมือ <b style="color:var(--blue2)">${sk}/5</b> &nbsp;·&nbsp; พฤติกรรม <b style="color:var(--green)">${bk}/5</b> &nbsp;·&nbsp; รวม <b style="color:var(--navy);font-size:20px">${avg}/100</b> &nbsp;<span style="color:var(--muted);font-size:13px">(${scored.length}/${dc.length} ข้อ)</span>`;
+}
+
+function saveEval(eid){
+  const data=window._te[eid];
+  const e=EMP.find(x=>x.id===eid);
+  const dc=deptCrit(e.dept);
+  if(!data||Object.keys(data).length<dc.length){if(!confirm('ยังให้คะแนนไม่ครบทุกหัวข้อ ต้องการบันทึกหรือไม่?'))return;}
+  if(!EVALS[monthKey])EVALS[monthKey]={};
+  const sc=dc.filter(c=>c.cat==='ฝีมือ'&&data[c.id]!=null);
+  const bc=dc.filter(c=>c.cat==='พฤติกรรม'&&data[c.id]!=null);
+  const skillAvg=sc.length?Math.round(sc.reduce((a,c)=>a+data[c.id],0)/sc.length*10)/10:0;
+  const behAvg=bc.length?Math.round(bc.reduce((a,c)=>a+data[c.id],0)/bc.length*10)/10:0;
+  const scored=dc.filter(c=>data[c.id]!=null);
+  const total=scored.reduce((a,c)=>a+data[c.id],0);
+  const avg=scored.length?Math.round((total/scored.length)/5*100*10)/10:0;
+  const evalAt=new Date();
+  EVALS[monthKey][eid]={
+    scores:{...(EVALS[monthKey][eid]?.scores||{}),...(data||{})},
+    evaluatorName:currentUser?.displayName||'-',
+    evaluatorUsername:currentUser?.username||'-',
+    evaluatedAt:evalAt.toISOString()
+  };
+  delete window._te[eid];
+  save();
+  // ── ส่งไป Google Sheets ──
+  if(S.sheetsUrl){
+    const params=new URLSearchParams({
+      date:evalAt.toLocaleDateString('th-TH'),
+      month:MONTHS[now.getMonth()]+' '+(now.getFullYear()+543),
+      empId:e.id,
+      empName:e.name,
+      dept:e.dept,
+      evaluatorName:currentUser?.displayName||'-',
+      skill:skillAvg,
+      beh:behAvg,
+      avg:avg
+    });
+    showSyncStatus('กำลังส่งข้อมูลไป Google Sheets...');
+    fetch(S.sheetsUrl+'?'+params.toString(),{method:'GET',mode:'no-cors'})
+      .then(()=>showSyncStatus('✅ ส่งข้อมูลเข้า Google Sheets เรียบร้อย',true))
+      .catch(()=>showSyncStatus('⚠️ เชื่อมต่อ Sheets ไม่ได้ (ข้อมูลบันทึกในเครื่องแล้ว)',false,true));
+  }
+  cm('m-eval');go('evaluate');
+}
+
+function showSyncStatus(msg,success,warn){
+  const el=document.createElement('div');
+  el.style.cssText=`position:fixed;bottom:20px;right:20px;z-index:999;padding:12px 18px;border-radius:10px;font-size:14px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,0.15);font-family:Sarabun,sans-serif;max-width:320px;`;
+  el.style.background=success?'#e6fcf5':warn?'#fff8e1':'#e7f0ff';
+  el.style.color=success?'#087f5b':warn?'#7c4f00':'#1864ab';
+  el.style.border=`1px solid ${success?'#0ca678':warn?'#f59f00':'#4c6ef5'}`;
+  el.textContent=msg;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),4000);
+}
+
+/* ── EMPLOYEES ── */
+let empQ='';
+function pageEmp(){
+  const vEmp=visibleEmp();
+  const filtered=vEmp.filter(e=>e.name.includes(empQ)||e.id.includes(empQ));
+  const evaluatedCount=vEmp.filter(e=>EVALS[monthKey]?.[e.id]).length;
+  return`
+<div class="page-header">
+  <div class="page-h">พนักงาน${isAdmin()?'ทั้งหมด':'แผนก '+myDept()}</div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <input class="search-bar" placeholder="🔍 ค้นหา..." value="${empQ}" oninput="empQ=this.value;go('employees')">
+    ${isAdmin()?`<button class="abtn abtn-green" onclick="openAddEmp()">+ เพิ่มพนักงาน</button>`:''}
+  </div>
+</div>
+${isAdmin()&&evaluatedCount>0?`
+<div style="background:#fff8e1;border:1.5px solid #f59f00;border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+  <div>
+    <div style="font-size:15px;font-weight:700;color:#7c4f00">🔄 รีเซตคะแนนประจำเดือน</div>
+    <div style="font-size:13px;color:#92640a;margin-top:2px">ลบผลประเมินทั้งหมด ${evaluatedCount} คน เพื่อให้หัวหน้าประเมินใหม่</div>
+  </div>
+  <button onclick="resetMonthAll()" style="padding:9px 18px;border-radius:8px;border:none;background:#f59f00;color:#fff;font-family:Sarabun,sans-serif;font-size:14px;font-weight:600;cursor:pointer">รีเซตทั้งเดือน</button>
+</div>`:''}
+<div class="tcard">
+  <table class="dtable">
+    <thead><tr><th>รหัสพนักงาน</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th>คะแนน</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+    <tbody>
+      ${filtered.map(e=>{const s=getScore(e.id,e.dept);return`<tr>
+        <td><span class="code">${e.id}</span></td>
+        <td><span class="ename">${e.name}</span></td>
+        <td><span class="badge badge-blue">${e.dept}</span></td>
+        <td>${s?`<b style="font-size:16px;color:var(--blue2)">${s.avg}</b><span style="font-size:12px;color:var(--muted)">/100</span>`:`<span style="color:var(--muted)">-</span>`}</td>
+        <td><span class="badge ${s?'badge-green':'badge-amber'}">${s?'ประเมินแล้ว':'รอประเมิน'}</span></td>
+        <td style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="back-btn" style="font-size:13px" onclick="openEvalModal('${e.id}')">ประเมิน</button>
+          ${isAdmin()&&s?`<button class="back-btn" style="font-size:13px;color:#7c4f00;border-color:#f59f00;background:#fff8e1" onclick="resetOneScore('${e.id}','${e.name}')">🔄 รีเซต</button>`:''}
+          ${isAdmin()?`<button class="back-btn" style="font-size:13px;color:var(--red);border-color:#ffc9c9" onclick="delEmp('${e.id}')">ลบ</button>`:''}
+        </td>
+      </tr>`;}).join('')}
+      ${filtered.length===0?`<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">ไม่พบพนักงาน</td></tr>`:''}
+    </tbody>
+  </table>
+</div>`;
+}
+
+function openAddEmp(){document.getElementById('ei-dept').innerHTML=S.depts.map(d=>`<option>${d}</option>`).join('');om('m-emp');}
+function addEmp(){
+  const id=document.getElementById('ei-id').value.trim();
+  const name=document.getElementById('ei-name').value.trim();
+  const dept=document.getElementById('ei-dept').value;
+  if(!id||!name){alert('กรุณากรอกข้อมูลให้ครบ');return;}
+  if(EMP.find(e=>e.id===id)){alert('รหัสพนักงานซ้ำ');return;}
+  EMP.push({id,name,dept});save();cm('m-emp');go('employees');
+}
+function delEmp(eid){if(!confirm('ยืนยันลบพนักงาน?'))return;EMP=EMP.filter(e=>e.id!==eid);save();go('employees');}
+function resetOneScore(eid,name){
+  if(!confirm(`ยืนยันรีเซตคะแนนของ "${name}" ?`))return;
+  if(EVALS[monthKey])delete EVALS[monthKey][eid];
+  save();go('employees');
+}
+function resetMonthAll(){
+  const vEmp=visibleEmp();
+  const count=vEmp.filter(e=>EVALS[monthKey]?.[e.id]).length;
+  if(!confirm(`ยืนยันรีเซตคะแนนทั้งหมด ${count} คน ?`))return;
+  if(EVALS[monthKey])vEmp.forEach(e=>{delete EVALS[monthKey][e.id];});
+  save();go('employees');
+}
+
+/* ── DEPT CRITERIA ── */
+let selDept=null;
+function pageDeptCrit(){
+  if(!selDept)selDept=S.depts[0];
+  const dc=deptCrit(selDept);
+  const sc=dc.filter(c=>c.cat==='ฝีมือ'),bc=dc.filter(c=>c.cat==='พฤติกรรม');
+  return`
+<div class="page-header">
+  <div class="page-h">หัวข้อประเมินแต่ละแผนก</div>
+  <button class="abtn abtn-blue" onclick="openAddCrit()">+ เพิ่มหัวข้อ</button>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+  ${S.depts.map(d=>`<button onclick="selDept='${d}';go('deptcrit')" style="padding:8px 16px;border-radius:20px;border:1.5px solid ${selDept===d?'var(--blue2)':'var(--border)'};background:${selDept===d?'var(--blue2)':'#fff'};color:${selDept===d?'#fff':'var(--text)'};font-family:Sarabun,sans-serif;font-size:14px;cursor:pointer">แผนก ${d}</button>`).join('')}
+</div>
+<div style="background:#fff;border-radius:12px;border:1px solid var(--border);padding:12px 16px;margin-bottom:10px;font-size:14px;color:var(--muted)">
+  📋 แผนก <b style="color:var(--navy)">${selDept}</b> มี <b style="color:var(--blue2)">${dc.length} หัวข้อ</b> (ฝีมือ ${sc.length} + พฤติกรรม ${bc.length})
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+  <div class="tcard">
+    <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:14px;font-weight:600;color:var(--blue2)">📐 ฝีมือและคุณภาพงาน (${sc.length})</div>
+    <table class="dtable"><thead><tr><th>ชื่อหัวข้อ</th><th></th></tr></thead><tbody>
+      ${sc.map(c=>`<tr><td>${c.name}</td><td><button class="back-btn" style="font-size:12px;color:var(--red);border-color:#ffc9c9" onclick="delCrit(${c.id})">ลบ</button></td></tr>`).join('')}
+      ${sc.length===0?`<tr><td colspan="2" style="text-align:center;padding:16px;color:var(--muted)">ยังไม่มีหัวข้อ</td></tr>`:''}
+    </tbody></table>
+  </div>
+  <div class="tcard">
+    <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:14px;font-weight:600;color:var(--green)">🎯 พฤติกรรม (${bc.length})</div>
+    <table class="dtable"><thead><tr><th>ชื่อหัวข้อ</th><th></th></tr></thead><tbody>
+      ${bc.map(c=>`<tr><td>${c.name}</td><td><button class="back-btn" style="font-size:12px;color:var(--red);border-color:#ffc9c9" onclick="delCrit(${c.id})">ลบ</button></td></tr>`).join('')}
+      ${bc.length===0?`<tr><td colspan="2" style="text-align:center;padding:16px;color:var(--muted)">ยังไม่มีหัวข้อ</td></tr>`:''}
+    </tbody></table>
+  </div>
+</div>`;
+}
+function openAddCrit(){
+  document.getElementById('ci-dept').innerHTML=S.depts.map(d=>`<option${d===selDept?' selected':''}>${d}</option>`).join('');
+  om('m-crit');
+}
+function addCrit(){
+  const name=document.getElementById('ci-name').value.trim();
+  const cat=document.getElementById('ci-cat').value;
+  const dept=document.getElementById('ci-dept').value;
+  if(!name){alert('กรุณาใส่ชื่อหัวข้อ');return;}
+  const newId=CRIT.length?Math.max(...CRIT.map(c=>c.id))+1:1;
+  CRIT.push({id:newId,dept,cat,name});save();selDept=dept;cm('m-crit');go('deptcrit');
+}
+function delCrit(id){if(!confirm('ยืนยันลบหัวข้อนี้?'))return;CRIT=CRIT.filter(c=>c.id!==id);save();go('deptcrit');}
+
+/* ── REPORT ── */
+function pageReport(){
+  const all=EMP.map(e=>({...e,s:getScore(e.id,e.dept)}));
+  const ev=all.filter(e=>e.s);
+  const avg=ev.length?Math.round(ev.reduce((a,e)=>a+e.s.avg,0)/ev.length*10)/10:'-';
+  return`
+<div class="stats-grid" style="margin-bottom:20px">
+  <div class="stat-card"><div class="stat-icon si-blue">📊</div><div><div class="stat-num">${ev.length}</div><div class="stat-lbl">ประเมินแล้ว</div></div></div>
+  <div class="stat-card"><div class="stat-icon si-green">⭐</div><div><div class="stat-num">${avg}</div><div class="stat-lbl">คะแนนเฉลี่ย</div></div></div>
+  <div class="stat-card"><div class="stat-icon si-amber">🥇</div><div><div class="stat-num">${ev.length?Math.max(...ev.map(e=>e.s.avg)):'-'}</div><div class="stat-lbl">สูงสุด</div></div></div>
+  <div class="stat-card"><div class="stat-icon si-red">⏳</div><div><div class="stat-num">${EMP.length-ev.length}</div><div class="stat-lbl">ยังไม่ประเมิน</div></div></div>
+</div>
+${S.depts.map(d=>{
+  const grp=all.filter(e=>e.dept===d&&e.s).sort((a,b)=>b.s.avg-a.s.avg);
+  const dc=deptCrit(d);
+  const gavg=grp.length?Math.round(grp.reduce((a,e)=>a+e.s.avg,0)/grp.length*10)/10:'-';
+  return`<div class="panel" style="margin-bottom:12px">
+    <div class="rpt-dept-header">
+      <div class="rpt-dept-name">
+        <div class="pdot pdot-blue"></div>
+        แผนก <span style="color:var(--blue2)">${d}</span>
+        <span style="background:#e7f0ff;color:var(--blue2);font-size:12px;font-weight:600;padding:2px 9px;border-radius:10px">${dc.length} หัวข้อ</span>
+      </div>
+      <div class="rpt-dept-avg">เฉลี่ย ${gavg}/100</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr style="background:#f8f9ff">
+        <th style="padding:7px 14px;color:#444;font-weight:700;font-size:14px;text-align:center;border-bottom:1px solid var(--border);width:36px">#</th>
+        <th style="padding:7px 14px;color:#444;font-weight:700;font-size:14px;text-align:left;border-bottom:1px solid var(--border)">รหัสพนักงาน</th>
+        <th style="padding:7px 14px;color:#444;font-weight:700;font-size:14px;text-align:left;border-bottom:1px solid var(--border)">ชื่อ-นามสกุล</th>
+        <th style="padding:7px 14px;color:#444;font-weight:700;font-size:14px;text-align:left;border-bottom:1px solid var(--border)">ผู้ประเมิน</th>
+        <th style="padding:7px 14px;color:#444;font-weight:700;font-size:14px;text-align:center;border-bottom:1px solid var(--border)">ฝีมือ/5</th>
+        <th style="padding:7px 14px;color:#444;font-weight:700;font-size:14px;text-align:center;border-bottom:1px solid var(--border)">พฤติกรรม/5</th>
+        <th style="padding:7px 14px;color:#444;font-weight:700;font-size:14px;text-align:center;border-bottom:1px solid var(--border)">รวม/100</th>
+      </tr></thead>
+      <tbody>
+        ${grp.map((e,i)=>{
+          const evName=EVALS[monthKey]?.[e.id]?.evaluatorName||'-';
+          return`<tr style="border-bottom:1px solid #f0f2f8">
+            <td style="padding:7px 14px;font-size:15px;font-weight:700;color:var(--muted);text-align:center">${i+1}</td>
+            <td style="padding:7px 14px"><span class="code">${e.id}</span></td>
+            <td style="padding:7px 14px"><span class="ename">${e.name}</span></td>
+            <td style="padding:7px 14px"><span style="font-size:13px;color:var(--muted)">${evName}</span></td>
+            <td style="padding:7px 14px;text-align:center"><span class="badge badge-blue" style="font-size:14px;font-weight:700">${e.s.skill}</span></td>
+            <td style="padding:7px 14px;text-align:center"><span class="badge badge-blue" style="font-size:14px;font-weight:700">${e.s.beh}</span></td>
+            <td style="padding:7px 14px;text-align:center"><span class="badge badge-green" style="font-size:15px;font-weight:700;padding:4px 12px">${e.s.avg}</span></td>
+          </tr>`;
+        }).join('')}
+        ${grp.length===0?`<tr><td colspan="7" style="text-align:center;padding:16px;color:var(--muted)">ยังไม่มีข้อมูล</td></tr>`:''}
+      </tbody>
+    </table>
+  </div>`;
+}).join('')}`;
+}
+
+/* ── ACCOUNTS ── */
+function pageAccounts(){
+  return`
+<div class="page-header">
+  <div class="page-h">จัดการบัญชีผู้ใช้</div>
+  <button class="abtn abtn-blue" onclick="openAddAcct()">+ เพิ่มบัญชี</button>
+</div>
+<div class="tcard">
+  <table class="dtable">
+    <thead><tr><th>ชื่อผู้ใช้</th><th>ชื่อแสดง</th><th>บทบาท</th><th>แผนก</th><th>จัดการ</th></tr></thead>
+    <tbody>
+      ${ACCOUNTS.map(a=>`<tr>
+        <td style="font-family:monospace;font-size:13px">${a.username}</td>
+        <td class="ename">${a.displayName}</td>
+        <td><span class="badge ${a.role==='admin'?'badge-blue':'badge-green'}">${a.role==='admin'?'Admin':'หัวหน้าแผนก'}</span></td>
+        <td>${a.dept?`<span class="badge badge-amber">${a.dept}</span>`:'<span style="color:var(--muted)">ทุกแผนก</span>'}</td>
+        <td>${a.username!=='admin'?`<button class="back-btn" style="font-size:13px;color:var(--red);border-color:#ffc9c9" onclick="delAcct('${a.username}')">ลบ</button>`:'<span style="color:var(--muted);font-size:12px">ลบไม่ได้</span>'}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>
+</div>`;
+}
+function openAddAcct(){
+  document.getElementById('ai-dept').innerHTML=S.depts.map(d=>`<option>${d}</option>`).join('');
+  om('m-acct');
+}
+function toggleDeptSel(){
+  document.getElementById('ai-dept-wrap').style.display=document.getElementById('ai-role').value==='admin'?'none':'block';
+}
+function addAcct(){
+  const u=document.getElementById('ai-user').value.trim();
+  const p=document.getElementById('ai-pass').value.trim();
+  const dn=document.getElementById('ai-dname').value.trim();
+  const role=document.getElementById('ai-role').value;
+  const dept=role==='admin'?null:document.getElementById('ai-dept').value;
+  if(!u||!p||!dn){alert('กรุณากรอกข้อมูลให้ครบ');return;}
+  if(ACCOUNTS.find(a=>a.username===u)){alert('ชื่อผู้ใช้นี้มีแล้ว');return;}
+  ACCOUNTS.push({username:u,password:p,role,displayName:dn,dept});
+  save();cm('m-acct');renderLoginUserList();go('accounts');
+}
+function delAcct(u){
+  if(!confirm('ยืนยันลบบัญชี?'))return;
+  ACCOUNTS=ACCOUNTS.filter(a=>a.username!==u);
+  save();renderLoginUserList();go('accounts');
+}
+
+/* ── SETTINGS ── */
+function pageSettings(){
+  const urlOk=S.sheetsUrl&&S.sheetsUrl.includes('script.google.com');
+  return`
+<div class="sgrid">
+  <div class="scard" style="grid-column:1/-1">
+    <div class="shead">🔗 เชื่อมต่อ Google Sheets</div>
+    <div style="padding:14px 16px;border-bottom:1px solid #f5f5f5">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:10px;height:10px;border-radius:50%;background:${urlOk?'#0ca678':'#dee2e6'};flex-shrink:0"></div>
+        <span style="font-size:14px;font-weight:600;color:${urlOk?'#087f5b':'var(--muted)'}">
+          ${urlOk?'เชื่อมต่อแล้ว — ข้อมูลจะส่งเข้า Google Sheets อัตโนมัติ':'ยังไม่ได้เชื่อมต่อ'}
+        </span>
+      </div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:10px">วาง URL จาก Google Apps Script (Deploy → Web App) ที่นี่</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input class="mini-inp" id="sheets-url" style="flex:1;font-size:13px" placeholder="https://script.google.com/macros/s/.../exec" value="${S.sheetsUrl||''}">
+        <button class="abtn abtn-blue" onclick="saveSheetUrl()">บันทึก</button>
+        ${S.sheetsUrl?`<button class="abtn" style="background:#fff5f5;color:var(--red)" onclick="testSheet()">ทดสอบ</button>`:''}
+      </div>
+      ${S.sheetsUrl?`<div style="margin-top:8px"><button class="back-btn" style="font-size:12px;color:var(--red);border-color:#ffc9c9" onclick="S.sheetsUrl='';save();go('settings')">ลบการเชื่อมต่อ</button></div>`:''}
+    </div>
+    <div style="padding:14px 16px;background:#f8f9fa">
+      <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:8px">📋 วิธีรับ URL จาก Google Sheets (ทำครั้งเดียว)</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8">
+        1. เปิด Google Sheets → <b>Extensions → Apps Script</b><br>
+        2. วางโค้ดที่ได้รับ → กด <b>Save</b><br>
+        3. กด <b>Deploy → New deployment → Web app</b><br>
+        4. ตั้ง Execute as: <b>Me</b> / Who has access: <b>Anyone</b><br>
+        5. กด Deploy → <b>Copy URL</b> มาวางในช่องด้านบน
+      </div>
+    </div>
+  </div>
+  <div class="scard">
+    <div class="shead">🏢 ข้อมูลบริษัท</div>
+    <div class="srow"><div><div class="slbl">ชื่อบริษัท / ระบบ</div><div class="ssub">แสดงที่ sidebar และหน้า Login</div></div><input class="mini-inp" style="width:150px" value="${S.company}" oninput="S.company=this.value;save();applyBranding()"></div>
+    <div class="srow"><div><div class="slbl">ตัวย่อ (โลโก้)</div><div class="ssub">1–3 ตัวอักษร</div></div><input class="mini-inp" maxlength="3" style="width:60px;text-align:center" value="${S.abbr}" oninput="S.abbr=this.value;save();applyBranding()"></div>
+  </div>
+  <div class="scard">
+    <div class="shead">🎨 สีธีม</div>
+    <div class="srow"><div class="slbl">เลือกสี</div><div style="display:flex;gap:10px;flex-wrap:wrap">
+      ${THEMES.map((t,i)=>`<div style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer" onclick="S.themeIdx=${i};save();applyBranding();go('settings')"><div class="cswatch${S.themeIdx===i?' sel':''}" style="background:${t.accent}"></div><span style="font-size:11px;color:var(--muted)">${t.name}</span></div>`).join('')}
+    </div></div>
+  </div>
+  <div class="scard" style="grid-column:1/-1">
+    <div class="shead">👥 แผนก / กลุ่ม</div>
+    <div style="padding:14px 16px;border-bottom:1px solid #f5f5f5">
+      <div style="margin-bottom:12px">${S.depts.map(d=>`<span class="dept-tag">${d}<span class="dtag-del" onclick="delDept('${d}')">×</span></span>`).join('')}</div>
+      <div style="display:flex;gap:8px"><input id="nd-new" class="mini-inp" style="flex:1" placeholder="ชื่อแผนกหรือกลุ่มใหม่"><button class="abtn abtn-blue" onclick="addDept()">+ เพิ่ม</button></div>
+    </div>
+    <div class="srow"><div><div class="slbl" style="color:var(--red)">รีเซตข้อมูลทั้งหมด</div><div class="ssub">ลบข้อมูลทุกอย่าง ไม่สามารถกู้คืน</div></div><button class="back-btn" style="color:var(--red);border-color:#ffc9c9" onclick="resetAll()">รีเซต</button></div>
+  </div>
+  <div class="scard" style="grid-column:1/-1">
+    <div class="shead">⭐ ความหมายของคะแนน 1–5</div>
+    ${[1,2,3,4,5].map(n=>`<div class="rlabel-row">
+      <div class="rlabel-num" style="${['','background:#ffecec;color:#c92a2a','background:#fff4e0;color:#d9480f','background:#e8f4fd;color:#1864ab','background:#e6fcf5;color:#087f5b','background:#edf2ff;color:#3b5bdb'][n]}">${n}</div>
+      <div style="flex:1"><div class="slbl">ระดับ ${n}</div><div class="ssub">ความหมายใต้ปุ่มคะแนน</div></div>
+      <input class="mini-inp" style="width:180px" value="${RL(n)}" oninput="if(!S.ratingLabels)S.ratingLabels=[...DEF_RL];S.ratingLabels[${n}]=this.value;save()">
+    </div>`).join('')}
+    <div style="padding:10px 16px;border-top:1px solid var(--border)"><button class="back-btn" style="font-size:13px" onclick="S.ratingLabels=[...DEF_RL];save();go('settings')">↺ คืนค่าเริ่มต้น</button></div>
+  </div>
+  <div class="scard" style="grid-column:1/-1">
+    <div class="shead">ℹ️ ข้อมูลระบบ</div>
+    <div class="srow"><div class="slbl">พนักงานทั้งหมด</div><span style="font-weight:700">${EMP.length} คน</span></div>
+    <div class="srow"><div class="slbl">หัวข้อประเมิน</div><span style="font-weight:700">${CRIT.length} ข้อ</span></div>
+    <div class="srow"><div class="slbl">บัญชีผู้ใช้</div><span style="font-weight:700">${ACCOUNTS.length} บัญชี</span></div>
+    <div class="srow"><div class="slbl">เดือนปัจจุบัน</div><span style="font-weight:600">${MONTHS[now.getMonth()]} ${now.getFullYear()+543}</span></div>
+  </div>
+</div>`;
+}
+
+function saveSheetUrl(){
+  const url=document.getElementById('sheets-url')?.value.trim();
+  if(!url){alert('กรุณาใส่ URL');return;}
+  if(!url.includes('script.google.com')){alert('URL ไม่ถูกต้อง\nต้องเป็น URL จาก Google Apps Script\nขึ้นต้นด้วย https://script.google.com/...');return;}
+  S.sheetsUrl=url;save();showSyncStatus('✅ บันทึก URL เรียบร้อย',true);go('settings');
+}
+function testSheet(){
+  if(!S.sheetsUrl){alert('กรุณาใส่ URL ก่อน');return;}
+  showSyncStatus('กำลังทดสอบการเชื่อมต่อ...');
+  fetch(S.sheetsUrl+'?action=test',{method:'GET',mode:'no-cors'})
+    .then(()=>showSyncStatus('✅ เชื่อมต่อสำเร็จ! Google Sheets พร้อมรับข้อมูล',true))
+    .catch(()=>showSyncStatus('⚠️ เชื่อมต่อไม่ได้ — ตรวจสอบ URL และการตั้งค่า Deploy',false,true));
+}
+function addDept(){const v=document.getElementById('nd-new')?.value.trim();if(!v)return;if(S.depts.includes(v)){alert('มีแผนกนี้แล้ว');return;}S.depts.push(v);save();go('settings');}
+function delDept(d){if(EMP.some(e=>e.dept===d)&&!confirm(`มีพนักงานในแผนก "${d}" ต้องการลบหรือไม่?`))return;S.depts=S.depts.filter(x=>x!==d);save();go('settings');}
+function resetAll(){if(!confirm('ยืนยันรีเซตข้อมูลทั้งหมด?'))return;localStorage.clear();S={...DEF_SET,depts:[...DEF_SET.depts],ratingLabels:[...DEF_RL],sheetsUrl:''};ACCOUNTS=DEF_ACCOUNTS.map(a=>({...a}));EMP=DEF_EMP.map(e=>({...e}));CRIT=DEF_CRIT.map(c=>({...c}));EVALS={};applyBranding();go('dashboard');}
+
+function om(id){document.getElementById(id).style.display='flex';}
+function cm(id){const el=document.getElementById(id);if(el)el.style.display='none';}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open');}
+
+// Init
+applyBranding();
+renderLoginUserList();
+</script>
+</body>
+</html>
