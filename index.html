@@ -562,15 +562,16 @@ function pageDash(){
   </div>
   <div class="panel">
     <div class="panel-header"><div class="panel-title"><div class="pdot pdot-green"></div>คะแนนสูงสุด</div><div class="link-btn" onclick="go('report')">ดูรายงาน →</div></div>
-    <div class="tscroll"><table class="ptable"><thead><tr><th>#</th><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th><th>คะแนน</th></tr></thead><tbody>
-      ${scored.slice(0,5).map((e,i)=>`<tr>
+    <div class="tscroll"><table class="ptable"><thead><tr><th>#</th><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>แผนก</th>${isAdmin()?'<th>ผู้ประเมิน</th>':''}<th>คะแนน</th></tr></thead><tbody>
+      ${scored.slice(0,5).map((e,i)=>{const evName=EVALS[monthKey]?.[e.id]?.evaluatorName||'-';return`<tr>
         <td style="color:var(--muted);font-weight:700">${i+1}</td>
         <td><span class="code">${e.id}</span></td>
         <td><span class="ename">${e.name}</span></td>
         <td style="color:var(--muted)">${e.dept}</td>
+        ${isAdmin()?`<td style="font-size:13px;color:var(--muted)">${evName}</td>`:''}
         <td><span class="badge badge-green">${e.s.avg}</span></td>
-      </tr>`).join('')}
-      ${scored.length===0?`<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">ยังไม่มีผลประเมิน</td></tr>`:''}
+      </tr>`;}).join('')}
+      ${scored.length===0?`<tr><td colspan="${isAdmin()?6:5}" style="text-align:center;padding:20px;color:var(--muted)">ยังไม่มีผลประเมิน</td></tr>`:''}
     </tbody></table></div>
   </div>
 </div>
