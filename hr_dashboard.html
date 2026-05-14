@@ -125,6 +125,17 @@ function showError(msg){
   document.getElementById('main-content').innerHTML = `<div class="error-box">⚠️ ${msg}</div>`;
 }
 
+function formatMonthTH(m){
+  // m = "2026-05" format
+  if(!m) return m;
+  const parts = m.split('-');
+  if(parts.length < 2) return m;
+  const year = parseInt(parts[0]) + 543;
+  const months = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const mon = months[parseInt(parts[1])] || parts[1];
+  return mon + ' ' + year;
+}
+
 function buildMonthOptions(){
   if(!S || !S.evaluations) return;
   const months = [...new Set(S.evaluations.map(e => e.month||'').filter(Boolean))].sort().reverse();
@@ -134,7 +145,7 @@ function buildMonthOptions(){
   months.forEach(m => {
     const opt = document.createElement('option');
     opt.value = m;
-    opt.textContent = m;
+    opt.textContent = formatMonthTH(m);
     if(m === cur) opt.selected = true;
     sel.appendChild(opt);
   });
@@ -180,19 +191,24 @@ function renderAll(){
     return;
   }
 
-  // คำนวณคะแนน
+  // คำนวณคะแนน — โครงสร้างข้อมูล: eid=employee id, totalScore=คะแนน, dept อยู่ใน employees
   const empScores = {};
   const deptScores = {};
 
-  evals.forEach(ev => {
-    const score = calcScore(ev);
-    const empKey = ev.employeeId || ev.employee || ev.emp || '';
-    const deptKey = ev.department || ev.dept || '';
+  // สร้าง map พนักงาน id → ข้อมูล
+  const empMap = {};
+  if(S.employees) S.employees.forEach(e => { empMap[e.id] = e; });
 
-    if(empKey){
-      if(!empScores[empKey]) empScores[empKey] = {total:0, count:0, dept: deptKey};
-      empScores[empKey].total += score;
-      empScores[empKey].count++;
+  evals.forEach(ev => {
+    const score = ev.totalScore !== undefined ? parseFloat(ev.totalScore)||0 : calcScore(ev);
+    const empId = ev.eid !== undefined ? ev.eid : (ev.employeeId || ev.employee || '');
+    const empInfo = empMap[empId] || {};
+    const deptKey = empInfo.dept || ev.department || ev.dept || '';
+
+    if(empId !== ''){
+      if(!empScores[empId]) empScores[empId] = {total:0, count:0, dept: deptKey, info: empInfo};
+      empScores[empId].total += score;
+      empScores[empId].count++;
     }
     if(deptKey){
       if(!deptScores[deptKey]) deptScores[deptKey] = {total:0, count:0};
@@ -202,13 +218,14 @@ function renderAll(){
   });
 
   const empList = Object.entries(empScores).map(([id,v])=>({
-    id, name: getEmployeeName(id),
-    dept: getDeptName(v.dept),
+    id,
+    name: v.info.name || v.info.display || id,
+    dept: v.dept || '-',
     avg: v.count ? +(v.total/v.count).toFixed(1) : 0
   })).sort((a,b)=>b.avg-a.avg);
 
-  const deptList = Object.entries(deptScores).map(([id,v])=>({
-    id, name: getDeptName(id),
+  const deptList = Object.entries(deptScores).map(([name,v])=>({
+    id: name, name: name,
     avg: v.count ? +(v.total/v.count).toFixed(1) : 0
   })).sort((a,b)=>b.avg-a.avg);
 
