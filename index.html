@@ -920,7 +920,7 @@ if(!S){
     skillTopics:JSON.parse(JSON.stringify(DEF_SKILL)),
     behavTopics:[...DEF_BEHAV],
     users:JSON.parse(JSON.stringify(DEF_USERS)),
-    gsUrl:'',
+    gsUrl:'https://script.google.com/macros/s/AKfycbyaAeSLrDT8pZFfFwrq_3EhRPLkRL-DtIDwr42fuFmHZJTL4M_D09NmV-jPHzBagRrjVw/exec',
     company:{name:'ระบบประเมินพนักงาน',abbr:'HR'},
     theme:{color:'#10b981',dark:'#059669',name:'เขียว'}
   };save();
@@ -1892,8 +1892,9 @@ document.getElementById('sum-month').value=curMonth();
 (async function initPull(){
   // อ่าน gsUrl จาก localStorage โดยตรง (S อาจยังไม่มี gsUrl ถ้าเป็นเครื่องใหม่)
   const stored = JSON.parse(localStorage.getItem('evalV3')||'null');
-  const url = (stored && stored.gsUrl) || S.gsUrl || '';
-  if(!url) return; // ไม่มี URL ข้าม
+  const HARDCODED_URL = 'https://script.google.com/macros/s/AKfycbyaAeSLrDT8pZFfFwrq_3EhRPLkRL-DtIDwr42fuFmHZJTL4M_D09NmV-jPHzBagRrjVw/exec';
+  const url = (stored && stored.gsUrl) || S.gsUrl || HARDCODED_URL;
+  // url มีค่าเสมอ (hardcoded fallback)
 
   // แสดง loading บน login page
   const hint = document.getElementById('lb-hint');
@@ -1906,6 +1907,8 @@ document.getElementById('sum-month').value=curMonth();
     if(j && j.data){
       // Merge: ถ้า cloud มีข้อมูล ใช้ cloud เป็นหลัก
       Object.assign(S, j.data);
+      // รักษา gsUrl ให้ถูกต้องเสมอ
+      if(!S.gsUrl) S.gsUrl = HARDCODED_URL;
       localStorage.setItem('evalV3', JSON.stringify(S));
       applyTheme(S.theme.color, S.theme.dark);
       document.getElementById('lb-company-name').textContent = S.company.name||'ระบบประเมินพนักงาน';
