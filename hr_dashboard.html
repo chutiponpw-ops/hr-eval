@@ -34,16 +34,16 @@ body{font-family:"Sarabun",Arial,sans-serif;background:#f0f4f8;min-height:100vh;
 .bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:10px;transition:width .6s ease}
 .bar-score{font-size:16px;font-weight:600;color:#fff}
 .bar-arrow{font-size:22px;color:#94a3b8;flex-shrink:0}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:flex-end;justify-content:center}
-.modal-overlay.open{display:flex}
-.modal-box{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:85vh;display:flex;flex-direction:column;animation:slideUp .25s ease}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal-header{padding:20px 20px 14px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
-.modal-title{font-size:23px;font-weight:700;color:#1a3a5c}
-.modal-avg-text{font-size:16px;color:#64748b;margin-top:4px}
-.modal-close{font-size:28px;color:#94a3b8;cursor:pointer;line-height:1;padding:0 4px}
-.modal-close:hover{color:#1a3a5c}
-.modal-body{overflow-y:auto;padding:16px 20px 32px;flex:1}
+.dept-page{display:none;position:fixed;inset:0;background:#f0f4f8;z-index:1000;overflow-y:auto;animation:slideIn .25s ease}
+.dept-page.open{display:block}
+@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.dept-topbar{background:#1a3a5c;padding:18px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:10}
+.dept-back{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:10px 18px;border-radius:8px;font-size:17px;cursor:pointer}
+.dept-back:hover{background:rgba(255,255,255,.25)}
+.dept-topbar-info{flex:1}
+.dept-title{font-size:22px;font-weight:700;color:#fff}
+.dept-subtitle{font-size:15px;color:rgba(255,255,255,.75);margin-top:3px}
+.dept-content{padding:20px;max-width:800px;margin:0 auto}
 .emp-table{width:100%;border-collapse:collapse;font-size:17px}
 .emp-table th{text-align:left;padding:10px 12px;color:#64748b;font-weight:600;border-bottom:2px solid #e2e8f0;font-size:16px}
 .emp-table td{padding:12px 12px;border-bottom:1px solid #f1f5f9;color:#1e293b}
@@ -57,7 +57,7 @@ body{font-family:"Sarabun",Arial,sans-serif;background:#f0f4f8;min-height:100vh;
 .error-box{background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:20px;margin:20px 0;color:#991b1b;font-size:17px}
 .no-data{text-align:center;padding:30px;color:#94a3b8;font-size:17px}
 @media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.main-row{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start}.bar-label{width:100px;font-size:13px}}
-@media(max-width:500px){body{padding:10px}.kpi-grid{grid-template-columns:repeat(2,1fr);gap:10px}.kpi-value{font-size:32px}.card{padding:18px}.card-title{font-size:19px}.emp-table{font-size:16px}.modal-box{border-radius:16px 16px 0 0}}
+@media(max-width:500px){body{padding:10px}.kpi-grid{grid-template-columns:repeat(2,1fr);gap:10px}.kpi-value{font-size:32px}.card{padding:18px}.card-title{font-size:19px}.emp-table{font-size:16px}}
 </style>
 </head>
 <body>
@@ -78,20 +78,20 @@ body{font-family:"Sarabun",Arial,sans-serif;background:#f0f4f8;min-height:100vh;
 
 <div id="main-content"><div class="loading">กำลังดึงข้อมูลจาก Cloud...</div></div>
 
-<!-- Dept Popup -->
-<div class="modal-overlay" id="dept-modal" onclick="closeDeptModal(event)">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div>
-        <div class="modal-title" id="modal-dept-name"></div>
-        <div class="modal-avg-text" id="modal-dept-avg"></div>
-      </div>
-      <span class="modal-close" onclick="document.getElementById('dept-modal').classList.remove('open');document.body.style.overflow=''">&#x2715;</span>
+<!-- Dept Full Page -->
+<div class="dept-page" id="dept-page">
+  <div class="dept-topbar">
+    <button class="dept-back" onclick="closeDeptPage()">&#8592; กลับ</button>
+    <div class="dept-topbar-info">
+      <div class="dept-title" id="dept-page-name"></div>
+      <div class="dept-subtitle" id="dept-page-avg"></div>
     </div>
-    <div class="modal-body">
+  </div>
+  <div class="dept-content">
+    <div class="card" style="margin-top:0">
       <table class="emp-table">
-        <thead><tr><th>#</th><th>ชื่อพนักงาน</th><th>คะแนน</th></tr></thead>
-        <tbody id="modal-emp-list"></tbody>
+        <thead><tr><th>#</th><th>ชื่อพนักงาน</th><th style="text-align:center">ฝีมือ</th><th style="text-align:center">พฤติกรรม</th><th style="text-align:center">รวม</th></tr></thead>
+        <tbody id="dept-emp-list"></tbody>
       </table>
     </div>
   </div>
@@ -182,8 +182,10 @@ function renderAll(){
       deptData[dept].total+=score;
       deptData[dept].count++;
       if(empId!==""){
-        if(!deptData[dept].emps[empId])deptData[dept].emps[empId]={name:empInfo.name||String(empId),total:0,count:0};
+        if(!deptData[dept].emps[empId])deptData[dept].emps[empId]={name:empInfo.name||String(empId),total:0,count:0,skill:0,behav:0};
         deptData[dept].emps[empId].total+=score;
+        deptData[dept].emps[empId].skill+=parseFloat(ev.skillPct)||0;
+        deptData[dept].emps[empId].behav+=parseFloat(ev.behavPct)||0;
         deptData[dept].emps[empId].count++;
       }
     }
@@ -199,7 +201,10 @@ function renderAll(){
     var avg=v.count?+(v.total/v.count).toFixed(1):0;
     var emps=Object.entries(v.emps).map(function(ev2){
       var eid=ev2[0],ed=ev2[1];
-      return{id:eid,name:ed.name,score:ed.count?+(ed.total/ed.count).toFixed(1):0};
+      return{id:eid,name:ed.name,
+        score:ed.count?+(ed.total/ed.count).toFixed(1):0,
+        skill:ed.count?+(ed.skill/ed.count).toFixed(1):0,
+        behav:ed.count?+(ed.behav/ed.count).toFixed(1):0};
     }).sort(function(a,b){return b.score-a.score});
     return{name:name,avg:avg,emps:emps};
   }).sort(function(a,b){return b.avg-a.avg});
@@ -248,23 +253,29 @@ function renderAll(){
 function openDeptModal(idx){
   var dept=window._deptList[idx];
   if(!dept)return;
-  document.getElementById("modal-dept-name").textContent=dept.name;
-  document.getElementById("modal-dept-avg").textContent="คะแนนเฉลี่ย: "+dept.avg+" | พนักงาน "+dept.emps.length+" คน";
-  var tbody=document.getElementById("modal-emp-list");
+  document.getElementById("dept-page-name").textContent=dept.name;
+  document.getElementById("dept-page-avg").textContent="คะแนนเฉลี่ย: "+dept.avg+" | พนักงาน "+dept.emps.length+" คน";
+  var tbody=document.getElementById("dept-emp-list");
   if(dept.emps.length===0){
-    tbody.innerHTML="<tr><td colspan=\"3\" style=\"text-align:center;padding:20px;color:#94a3b8;font-size:17px\">ไม่มีข้อมูล</td></tr>";
+    tbody.innerHTML="<tr><td colspan=\"5\" style=\"text-align:center;padding:30px;color:#94a3b8;font-size:17px\">ไม่มีข้อมูล</td></tr>";
   }else{
     tbody.innerHTML=dept.emps.map(function(e,i){
-      return"<tr><td><span class=\"rank-num\">"+(i+1)+"</span></td><td style=\"font-weight:500\">"+e.name+"</td><td><span class=\"badge "+badgeClass(e.score)+"\">"+e.score+"</span></td></tr>";
+      return"<tr>"+
+        "<td><span class=\"rank-num\">"+(i+1)+"</span></td>"+
+        "<td style=\"font-weight:500\">"+e.name+"</td>"+
+        "<td style=\"text-align:center\"><span class=\"badge "+badgeClass(e.skill)+"\">"+e.skill+"%</span></td>"+
+        "<td style=\"text-align:center\"><span class=\"badge "+badgeClass(e.behav)+"\">"+e.behav+"%</span></td>"+
+        "<td style=\"text-align:center\"><span class=\"badge "+badgeClass(e.score)+"\">"+e.score+"</span></td>"+
+      "</tr>";
     }).join("");
   }
-  document.getElementById("dept-modal").classList.add("open");
+  document.getElementById("dept-page").classList.add("open");
+  window.scrollTo(0,0);
   document.body.style.overflow="hidden";
 }
 
-function closeDeptModal(event){
-  if(event&&event.target!==document.getElementById("dept-modal"))return;
-  document.getElementById("dept-modal").classList.remove("open");
+function closeDeptPage(){
+  document.getElementById("dept-page").classList.remove("open");
   document.body.style.overflow="";
 }
 
