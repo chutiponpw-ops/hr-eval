@@ -34,7 +34,7 @@ body{font-family:"Sarabun",Arial,sans-serif;background:#f0f4f8;min-height:100vh;
 .bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:10px;transition:width .6s ease}
 .bar-score{font-size:16px;font-weight:600;color:#fff}
 .bar-arrow{font-size:22px;color:#94a3b8;flex-shrink:0}
-.dept-page{display:none;position:fixed;inset:0;background:#f0f4f8;z-index:1000;overflow-y:auto;animation:slideIn .25s ease}
+.dept-page{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;min-height:100%;background:#f0f4f8;z-index:1000;overflow-y:auto;overflow-x:hidden;animation:slideIn .25s ease}
 .dept-page.open{display:block}
 @keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
 .dept-topbar{background:#1a3a5c;padding:18px 20px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:10}
@@ -43,7 +43,7 @@ body{font-family:"Sarabun",Arial,sans-serif;background:#f0f4f8;min-height:100vh;
 .dept-topbar-info{flex:1}
 .dept-title{font-size:22px;font-weight:700;color:#fff}
 .dept-subtitle{font-size:15px;color:rgba(255,255,255,.75);margin-top:3px}
-.dept-content{padding:20px;max-width:800px;margin:0 auto}
+.dept-content{padding:20px;max-width:800px;margin:0 auto;min-height:calc(100vh - 70px)}
 .emp-table{width:100%;border-collapse:collapse;font-size:17px}
 .emp-table th{text-align:left;padding:10px 12px;color:#64748b;font-weight:600;border-bottom:2px solid #e2e8f0;font-size:16px}
 .emp-table td{padding:12px 12px;border-bottom:1px solid #f1f5f9;color:#1e293b}
