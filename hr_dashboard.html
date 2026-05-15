@@ -87,12 +87,7 @@ body{font-family:'Sarabun',Arial,sans-serif;background:var(--bg);min-height:100v
 .export-btn{background:#fff;border:1.5px solid var(--blue);color:var(--blue);padding:7px 14px;border-radius:8px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:600}
 .export-btn:hover{background:#eff6ff}
 
-/* BOTTOM NAV */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--navy);height:64px;display:flex;align-items:center;justify-content:space-around;z-index:100;padding:0 8px}
-.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;color:rgba(255,255,255,.5);font-size:12px;cursor:pointer;padding:8px 16px;border-radius:10px;transition:all .2s}
-.nav-item.active{background:var(--blue);color:#fff}
-.nav-icon{font-size:22px}
-.page-content{padding-bottom:80px}
+.page-content{padding-bottom:20px}
 
 /* DEPT FULLPAGE */
 .dept-page{display:none;position:fixed;top:0;left:0;width:100vw;height:100%;background:var(--bg);z-index:200;overflow-y:scroll;-webkit-overflow-scrolling:touch}
@@ -101,7 +96,7 @@ body{font-family:'Sarabun',Arial,sans-serif;background:var(--bg);min-height:100v
 .dept-back{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:8px 16px;border-radius:8px;font-size:16px;cursor:pointer}
 .dept-title{font-size:20px;font-weight:700;color:#fff;flex:1}
 .dept-subtitle{font-size:14px;color:rgba(255,255,255,.7)}
-.dept-content{padding:16px;max-width:800px;margin:0 auto;padding-bottom:100px;flex:1}
+.dept-content{padding:16px;max-width:800px;margin:0 auto;padding-bottom:30px;flex:1}
 
 /* LOADING / ERROR */
 .loading{text-align:center;padding:60px;font-size:18px;color:var(--gray)}
@@ -216,24 +211,8 @@ body{font-family:'Sarabun',Arial,sans-serif;background:var(--bg);min-height:100v
       </table>
     </div>
   </div>
-  <!-- DEPT BOTTOM NAV -->
-  <div class="bottom-nav" style="position:sticky;bottom:0;flex-shrink:0">
-    <div class="nav-item" onclick="closeDeptPage()"><span class="nav-icon">🏠</span>หน้าหลัก</div>
-    <div class="nav-item" onclick="exportDeptExcel()"><span class="nav-icon">📊</span>รายงาน</div>
-    <div class="nav-item"><span class="nav-icon">👥</span>พนักงาน</div>
-    <div class="nav-item"><span class="nav-icon">✅</span>ประเมินผล</div>
-    <div class="nav-item"><span class="nav-icon">⚙️</span>ตั้งค่า</div>
-  </div>
 </div>
 
-<!-- BOTTOM NAV -->
-<div class="bottom-nav">
-  <div class="nav-item active"><span class="nav-icon">🏠</span>หน้าหลัก</div>
-  <div class="nav-item" onclick="exportAllExcel()"><span class="nav-icon">📊</span>รายงาน</div>
-  <div class="nav-item"><span class="nav-icon">👥</span>พนักงาน</div>
-  <div class="nav-item"><span class="nav-icon">✅</span>ประเมินผล</div>
-  <div class="nav-item"><span class="nav-icon">⚙️</span>ตั้งค่า</div>
-</div>
 
 <script>
 const GS_URL='https://script.google.com/macros/s/AKfycbyaAeSLrDT8pZFfFwrq_3EhRPLkRL-DtIDwr42fuFmHZJTL4M_D09NmV-jPHzBagRrjVw/exec';
