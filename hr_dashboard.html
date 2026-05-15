@@ -6,58 +6,58 @@
 <title>รายงานผู้บริหาร — PHONGWARIN</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:"Sarabun",Arial,sans-serif;background:#f0f4f8;min-height:100vh;padding:16px}
+body{font-family:"Sarabun",Arial,sans-serif;background:#f0f4f8;min-height:100vh;padding:16px;font-size:17px}
 .header{background:#1a3a5c;padding:20px 28px;border-radius:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
-.header-company{font-size:22px;font-weight:600;color:#fff;margin-bottom:4px}
-.header-sub{font-size:14px;color:rgba(255,255,255,.75)}
+.header-company{font-size:26px;font-weight:600;color:#fff;margin-bottom:4px}
+.header-sub{font-size:16px;color:rgba(255,255,255,.75)}
 .header-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .month-sel{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);color:#fff;padding:8px 16px;border-radius:8px;font-size:16px;cursor:pointer}
-.month-sel option{color:#000;background:#fff}
+.month-sel option{color:#000;background:#fff;font-size:16px}
 .refresh-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);color:#fff;padding:8px 16px;border-radius:8px;font-size:15px;cursor:pointer}
 .refresh-btn:hover{background:rgba(255,255,255,.25)}
-.sync-status{font-size:13px;color:rgba(255,255,255,.7);margin-top:4px}
+.sync-status{font-size:15px;color:rgba(255,255,255,.7);margin-top:4px}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
 .kpi{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px 22px}
-.kpi-label{font-size:15px;color:#64748b;margin-bottom:10px}
-.kpi-value{font-size:36px;font-weight:600;color:#1a3a5c;line-height:1}
-.kpi-value-sm{font-size:22px;font-weight:600;color:#1a3a5c;line-height:1.3;padding-top:2px}
-.kpi-sub{font-size:14px;margin-top:8px}
+.kpi-label{font-size:17px;color:#64748b;margin-bottom:10px}
+.kpi-value{font-size:42px;font-weight:600;color:#1a3a5c;line-height:1}
+.kpi-value-sm{font-size:26px;font-weight:600;color:#1a3a5c;line-height:1.3;padding-top:2px}
+.kpi-sub{font-size:16px;margin-top:8px}
 .good{color:#0f6e56}.warn{color:#ba7517}.bad{color:#a32d2d}
 .main-row{display:grid;grid-template-columns:1.2fr 1fr;gap:14px;margin-bottom:20px}
 .card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:22px}
-.card-title{font-size:18px;font-weight:600;color:#1a3a5c;margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid #e2e8f0}
+.card-title{font-size:21px;font-weight:600;color:#1a3a5c;margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid #e2e8f0}
 .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;cursor:pointer;border-radius:8px;padding:4px;transition:background .15s}
 .bar-row:hover{background:#f1f5f9}
 .bar-row:active{background:#e2e8f0}
-.bar-label{font-size:15px;color:#334155;width:130px;flex-shrink:0}
+.bar-label{font-size:17px;color:#334155;width:130px;flex-shrink:0}
 .bar-track{flex:1;height:28px;background:#f1f5f9;border-radius:6px;overflow:hidden}
 .bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:10px;transition:width .6s ease}
-.bar-score{font-size:14px;font-weight:600;color:#fff}
-.bar-arrow{font-size:18px;color:#94a3b8;flex-shrink:0}
+.bar-score{font-size:16px;font-weight:600;color:#fff}
+.bar-arrow{font-size:22px;color:#94a3b8;flex-shrink:0}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:flex-end;justify-content:center}
 .modal-overlay.open{display:flex}
 .modal-box{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:85vh;display:flex;flex-direction:column;animation:slideUp .25s ease}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .modal-header{padding:20px 20px 14px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
-.modal-title{font-size:20px;font-weight:700;color:#1a3a5c}
-.modal-avg-text{font-size:14px;color:#64748b;margin-top:4px}
+.modal-title{font-size:23px;font-weight:700;color:#1a3a5c}
+.modal-avg-text{font-size:16px;color:#64748b;margin-top:4px}
 .modal-close{font-size:28px;color:#94a3b8;cursor:pointer;line-height:1;padding:0 4px}
 .modal-close:hover{color:#1a3a5c}
 .modal-body{overflow-y:auto;padding:16px 20px 32px;flex:1}
-.emp-table{width:100%;border-collapse:collapse;font-size:15px}
-.emp-table th{text-align:left;padding:10px 12px;color:#64748b;font-weight:600;border-bottom:2px solid #e2e8f0;font-size:14px}
+.emp-table{width:100%;border-collapse:collapse;font-size:17px}
+.emp-table th{text-align:left;padding:10px 12px;color:#64748b;font-weight:600;border-bottom:2px solid #e2e8f0;font-size:16px}
 .emp-table td{padding:12px 12px;border-bottom:1px solid #f1f5f9;color:#1e293b}
 .emp-table tr:last-child td{border-bottom:none}
-.badge{display:inline-block;padding:5px 16px;border-radius:20px;font-size:15px;font-weight:600}
+.badge{display:inline-block;padding:6px 18px;border-radius:20px;font-size:17px;font-weight:600}
 .badge-hi{background:#dcfce7;color:#166534}
 .badge-mid{background:#fef3c7;color:#92400e}
 .badge-lo{background:#fee2e2;color:#991b1b}
-.rank-num{color:#94a3b8;font-size:14px;margin-right:4px}
-.loading{text-align:center;padding:60px;font-size:18px;color:#64748b}
-.error-box{background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:20px;margin:20px 0;color:#991b1b;font-size:15px}
-.no-data{text-align:center;padding:30px;color:#94a3b8;font-size:15px}
+.rank-num{color:#94a3b8;font-size:16px;margin-right:4px}
+.loading{text-align:center;padding:60px;font-size:20px;color:#64748b}
+.error-box{background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:20px;margin:20px 0;color:#991b1b;font-size:17px}
+.no-data{text-align:center;padding:30px;color:#94a3b8;font-size:17px}
 @media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}.main-row{grid-template-columns:1fr}.header{flex-direction:column;align-items:flex-start}.bar-label{width:100px;font-size:13px}}
-@media(max-width:500px){body{padding:10px}.kpi-grid{grid-template-columns:repeat(2,1fr);gap:10px}.kpi-value{font-size:28px}.card{padding:16px}.card-title{font-size:16px}.emp-table{font-size:14px}.modal-box{border-radius:16px 16px 0 0}}
+@media(max-width:500px){body{padding:10px}.kpi-grid{grid-template-columns:repeat(2,1fr);gap:10px}.kpi-value{font-size:32px}.card{padding:18px}.card-title{font-size:19px}.emp-table{font-size:16px}.modal-box{border-radius:16px 16px 0 0}}
 </style>
 </head>
 <body>
@@ -214,15 +214,14 @@ function renderAll(){
 
   function empRows(list){
     return list.map(function(e,i){
-      return"<tr><td><span class=\"rank-num\">"+(i+1)+"</span></td><td>"+e.name+"</td><td style=\"font-size:13px;color:#64748b\">"+e.dept+"</td><td><span class=\"badge "+badgeClass(e.avg)+"\">"+e.avg+"</span></td></tr>";
+      return"<tr><td><span class=\"rank-num\">"+(i+1)+"</span></td><td>"+e.name+"</td><td style=\"font-size:15px;color:#64748b\">"+e.dept+"</td><td><span class=\"badge "+badgeClass(e.avg)+"\">"+e.avg+"</span></td></tr>";
     }).join("");
   }
 
   function deptRows(){
     if(deptList.length===0)return"<div class=\"no-data\">ไม่มีข้อมูลแผนก</div>";
-    return deptList.map(function(d){
-      var safeName=d.name.replace(/"/g,"&quot;");
-      return"<div class=\"bar-row\" onclick=\"openDeptModal(\""+safeName+"\")\"><div class=\"bar-label\">"+d.name+"</div><div class=\"bar-track\"><div class=\"bar-fill\" style=\"width:"+Math.round(d.avg)+"%;background:"+barColor(d.avg)+"\"><span class=\"bar-score\">"+d.avg+"</span></div></div><div class=\"bar-arrow\">&rsaquo;</div></div>";
+    return deptList.map(function(d,i){
+      return"<div class=\"bar-row\" onclick=\"openDeptModal("+i+")\"><div class=\"bar-label\">"+d.name+"</div><div class=\"bar-track\"><div class=\"bar-fill\" style=\"width:"+Math.round(d.avg)+"%;background:"+barColor(d.avg)+"\"><span class=\"bar-score\">"+d.avg+"</span></div></div><div class=\"bar-arrow\">&rsaquo;</div></div>";
     }).join("");
   }
 
@@ -234,7 +233,7 @@ function renderAll(){
     "<div class=\"kpi\"><div class=\"kpi-label\">แผนกที่ต้องพัฒนา</div><div class=\"kpi-value-sm\">"+(botDept?botDept.name:"-")+"</div><div class=\"kpi-sub warn\">คะแนนเฉลี่ย "+(botDept?botDept.avg:"-")+"</div></div>"+
   "</div>"+
   "<div class=\"main-row\">"+
-    "<div class=\"card\"><div class=\"card-title\">คะแนนเฉลี่ยแยกแผนก <span style=\"font-size:13px;font-weight:400;color:#94a3b8\">&#128070; กดแถบเพื่อดูรายชื่อ</span></div>"+deptRows()+"</div>"+
+    "<div class=\"card\"><div class=\"card-title\">คะแนนเฉลี่ยแยกแผนก <span style=\"font-size:15px;font-weight:400;color:#94a3b8\">&#128070; กดแถบเพื่อดูรายชื่อ</span></div>"+deptRows()+"</div>"+
     "<div style=\"display:flex;flex-direction:column;gap:14px\">"+
       "<div class=\"card\"><div class=\"card-title\">พนักงานคะแนนสูงสุด 10 คน</div>"+
         (top10.length===0?"<div class=\"no-data\">ไม่มีข้อมูล</div>":"<table class=\"emp-table\"><tr><th>#</th><th>ชื่อ</th><th>แผนก</th><th>คะแนน</th></tr>"+empRows(top10)+"</table>")+
@@ -246,14 +245,14 @@ function renderAll(){
   "</div>";
 }
 
-function openDeptModal(deptName){
-  var dept=window._deptList.find(function(d){return d.name===deptName});
+function openDeptModal(idx){
+  var dept=window._deptList[idx];
   if(!dept)return;
   document.getElementById("modal-dept-name").textContent=dept.name;
   document.getElementById("modal-dept-avg").textContent="คะแนนเฉลี่ย: "+dept.avg+" | พนักงาน "+dept.emps.length+" คน";
   var tbody=document.getElementById("modal-emp-list");
   if(dept.emps.length===0){
-    tbody.innerHTML="<tr><td colspan=\"3\" style=\"text-align:center;padding:20px;color:#94a3b8\">ไม่มีข้อมูล</td></tr>";
+    tbody.innerHTML="<tr><td colspan=\"3\" style=\"text-align:center;padding:20px;color:#94a3b8;font-size:17px\">ไม่มีข้อมูล</td></tr>";
   }else{
     tbody.innerHTML=dept.emps.map(function(e,i){
       return"<tr><td><span class=\"rank-num\">"+(i+1)+"</span></td><td style=\"font-weight:500\">"+e.name+"</td><td><span class=\"badge "+badgeClass(e.score)+"\">"+e.score+"</span></td></tr>";
