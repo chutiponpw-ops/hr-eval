@@ -95,13 +95,13 @@ body{font-family:'Sarabun',Arial,sans-serif;background:var(--bg);min-height:100v
 .page-content{padding-bottom:80px}
 
 /* DEPT FULLPAGE */
-.dept-page{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:var(--bg);z-index:200;overflow-y:auto;overflow-x:hidden}
-.dept-page.open{display:block}
-.dept-topbar{background:var(--navy);padding:0 16px;height:64px;display:flex;align-items:center;gap:14px;position:sticky;top:0}
+.dept-page{display:none;position:fixed;top:0;left:0;width:100vw;height:100%;background:var(--bg);z-index:200;overflow-y:scroll;-webkit-overflow-scrolling:touch}
+.dept-page.open{display:flex;flex-direction:column}
+.dept-topbar{background:var(--navy);padding:0 16px;height:64px;display:flex;align-items:center;gap:14px;flex-shrink:0}
 .dept-back{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:8px 16px;border-radius:8px;font-size:16px;cursor:pointer}
 .dept-title{font-size:20px;font-weight:700;color:#fff;flex:1}
 .dept-subtitle{font-size:14px;color:rgba(255,255,255,.7)}
-.dept-content{padding:16px;max-width:800px;margin:0 auto;padding-bottom:80px}
+.dept-content{padding:16px;max-width:800px;margin:0 auto;padding-bottom:100px;flex:1}
 
 /* LOADING / ERROR */
 .loading{text-align:center;padding:60px;font-size:18px;color:var(--gray)}
@@ -215,6 +215,14 @@ body{font-family:'Sarabun',Arial,sans-serif;background:var(--bg);min-height:100v
         <tbody id="dept-emp-list"></tbody>
       </table>
     </div>
+  </div>
+  <!-- DEPT BOTTOM NAV -->
+  <div class="bottom-nav" style="position:sticky;bottom:0;flex-shrink:0">
+    <div class="nav-item" onclick="closeDeptPage()"><span class="nav-icon">🏠</span>หน้าหลัก</div>
+    <div class="nav-item" onclick="exportDeptExcel()"><span class="nav-icon">📊</span>รายงาน</div>
+    <div class="nav-item"><span class="nav-icon">👥</span>พนักงาน</div>
+    <div class="nav-item"><span class="nav-icon">✅</span>ประเมินผล</div>
+    <div class="nav-item"><span class="nav-icon">⚙️</span>ตั้งค่า</div>
   </div>
 </div>
 
@@ -446,7 +454,7 @@ function showAllDepts(){
   // ปรับ header ตาราง
   document.querySelector('#dept-emp-list').closest('table').querySelector('thead tr').innerHTML=
     '<th>แผนก</th><th>คะแนนเฉลี่ย</th><th>จำนวน</th><th></th>';
-  document.getElementById('dept-page').style.display='block';
+  document.getElementById('dept-page').classList.add('open');
 }
 
 function openDeptPage(idx){
@@ -469,12 +477,13 @@ function openDeptPage(idx){
         '<td style="text-align:center"><span class="badge '+badgeClass(e.score)+'">'+e.score+'</span></td>'+
       '</tr>';
     }).join('');
-  document.getElementById('dept-page').style.display='block';
-  document.getElementById('dept-page').scrollTop=0;
+  var dp=document.getElementById('dept-page');
+  dp.classList.add('open');
+  dp.scrollTop=0;
 }
 
 function closeDeptPage(){
-  document.getElementById('dept-page').style.display='none';
+  document.getElementById('dept-page').classList.remove('open');
 }
 
 // ===== EXPORT EXCEL =====
