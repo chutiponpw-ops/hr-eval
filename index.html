@@ -617,7 +617,7 @@ hr{border:none;border-top:1px solid var(--border);margin:14px 0;}
           <input type="month" id="sum-month" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;" onchange="renderSummary()">
         </div>
         <div class="tw"><table>
-          <thead><tr><th>รหัส</th><th>ชื่อ-สกุล</th><th>แผนก</th><th>เดือน</th><th>ฝีมือ</th><th>พฤติกรรม</th><th>รวม</th><th>ระดับ</th><th>รายละเอียด</th></tr></thead>
+          <thead><tr><th>รหัส</th><th>ชื่อ-สกุล</th><th>แผนก</th><th>เดือน</th><th>ผู้ประเมิน</th><th>ฝีมือ</th><th>พฤติกรรม</th><th>รวม</th><th>ระดับ</th><th>รายละเอียด</th></tr></thead>
           <tbody id="sum-table"></tbody>
         </table></div>
       </div>
@@ -1081,15 +1081,27 @@ function renderDash(){
 
   const emps = myEmps();
   const myD = myDepts();
-  // admin เห็นทุกคะแนน, หัวหน้าเห็นเฉพาะที่ตัวเองประเมิน
+  // admin: เอาคะแนนล่าสุดต่อพนักงาน 1 คน (ไม่นับซ้ำหลายหัวหน้า)
+  // หัวหน้า: เห็นเฉพาะที่ตัวเองประเมิน
   const allEvs = S.evaluations.filter(e=>e.month===month);
-  const doneEvs = CU?.role==='admin' ? allEvs : allEvs.filter(e=>e.by===CU?.username);
+  let doneEvs;
+  if(CU?.role==='admin'){
+    // กรองเอาล่าสุดต่อ eid (กรณี admin)
+    const latestMap={};
+    allEvs.forEach(e=>{
+      if(!latestMap[e.eid]||new Date(e.at||0)>new Date(latestMap[e.eid].at||0))
+        latestMap[e.eid]=e;
+    });
+    doneEvs=Object.values(latestMap);
+  }else{
+    doneEvs=allEvs.filter(e=>e.by===CU?.username);
+  }
   const doneSet = new Set(doneEvs.map(e=>e.eid));
   const myEmpIds = new Set(emps.map(e=>e.id));
   const myDoneEvs = doneEvs.filter(e=>myEmpIds.has(e.eid));
 
   const total = emps.length;
-  const done = emps.filter(e=>doneSet.has(e.id)).length;
+  const done = myDoneEvs.length;
   const pending = total - done;
   const pct = total ? Math.round(done/total*100) : 0;
 
@@ -1401,7 +1413,10 @@ function renderSummary(){
     const emp=S.employees.find(e=>e.id===ev.eid);if(!emp)return'';
     if(df&&emp.dept!==df)return'';
     const lv=ev.totalScore>=80?'<span class="tag tag-g">ดีมาก</span>':ev.totalScore>=60?'<span class="tag tag-b">ดี</span>':ev.totalScore>=40?'<span class="tag tag-y">พอใช้</span>':'<span class="tag tag-r">ต้องปรับปรุง</span>';
-    return`<tr><td style="color:var(--muted);font-size:12px;">${emp.code||''}</td><td><div>${emp.name}</div><div style="font-size:12px;color:var(--muted);">${emp.code||''}</div></td><td><span class="tag tag-b">${emp.dept}</span></td><td>${ev.month}</td><td>${ev.skillPct}%</td><td>${ev.behavPct}%</td><td><strong>${ev.totalScore}%</strong></td><td>${lv}</td><td><button class="btn btn-outline btn-sm" onclick="viewScore(${ev.eid},'${ev.month}')">ดู</button></td></tr>`;
+    // หาชื่อแสดงของผู้ประเมิน
+    const evaluator=S.users?.find(u=>u.username===ev.by);
+    const byName=evaluator?evaluator.display:(ev.by||'-');
+    return`<tr><td style="color:var(--muted);font-size:12px;">${emp.code||''}</td><td><div>${emp.name}</div><div style="font-size:12px;color:var(--muted);">${emp.code||''}</div></td><td><span class="tag tag-b">${emp.dept}</span></td><td>${ev.month}</td><td style="font-size:13px;color:var(--muted);">${byName}</td><td>${ev.skillPct}%</td><td>${ev.behavPct}%</td><td><strong>${ev.totalScore}%</strong></td><td>${lv}</td><td><button class="btn btn-outline btn-sm" onclick="viewScore(${ev.eid},'${ev.month}')">ดู</button></td></tr>`
   }).filter(Boolean).join('')||'<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px;">ยังไม่มีผลการประเมิน</td></tr>';
 }
 
@@ -1845,7 +1860,7 @@ function doExport(){
     const behavTopics=S.behavTopics;
     // Build header: summary cols + each skill topic + each behav topic
     const header=['รหัส','ชื่อ-สกุล','แผนก','เดือน',
-      'คะแนนฝีมือ (%)','คะแนนพฤติกรรม (%)','คะแนนรวม (%)','ระดับ',
+      'ผู้ประเมิน','คะแนนฝีมือ (%)','คะแนนพฤติกรรม (%)','คะแนนรวม (%)','ระดับ',
       '','ส่วนที่ 4 — ฝีมือ',
       ...skillTopics.map((_,i)=>`ฝีมือ ${i+1}`),
       '','ส่วนที่ 5 — พฤติกรรม',
@@ -1865,7 +1880,7 @@ function doExport(){
       const behavScores=behavTopics.map((_,i)=>ev?ev.scores['b_'+i]||'-':'');
       rows.push([
         emp.code||'',emp.name,dept,m,
-        ev?ev.skillPct+'%':'',ev?ev.behavPct+'%':'',ev?ev.totalScore+'%':'',lv,
+        ev?ev.by||'':'',ev?ev.skillPct+'%':'',ev?ev.behavPct+'%':'',ev?ev.totalScore+'%':'',lv,
         '',...skillScores,'','',...behavScores
       ]);
     });
