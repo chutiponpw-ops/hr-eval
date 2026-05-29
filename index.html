@@ -1260,8 +1260,10 @@ function renderResList(){
   const m=mf||curMonth();
 
   document.getElementById('res-table').innerHTML=list.map(e=>{
-    // แสดงเฉพาะคะแนนที่หัวหน้าคนนี้ประเมินเอง
-    const ev=S.evaluations.find(x=>x.eid===e.id&&x.month===m&&x.by===CU?.username);
+    // admin เห็นทุกคะแนน (เอาล่าสุด), หัวหน้าเห็นเฉพาะที่ตัวเองประเมิน
+    const ev=CU?.role==='admin'
+      ? S.evaluations.filter(x=>x.eid===e.id&&x.month===m).sort((a,b)=>new Date(b.at||0)-new Date(a.at||0))[0]
+      : S.evaluations.find(x=>x.eid===e.id&&x.month===m&&x.by===CU?.username);
     const badge=ev?`<span class="tag tag-g">✅ ${ev.totalScore}%</span>`:`<span class="tag tag-y">⏳ รอประเมิน</span>`;
     return`<tr>
       <td style="color:var(--muted);font-size:12px;">${e.code||'-'}</td>
@@ -1269,8 +1271,8 @@ function renderResList(){
       <td><span class="tag tag-b">${e.dept}</span></td>
       <td>${badge}</td>
       <td>
-        <button class="btn btn-primary btn-sm" onclick="openEvalFor(${e.id})">${ev?'แก้ไข':'ประเมิน'}</button>
-        ${ev?`<button class="btn btn-outline btn-sm" onclick="viewScore(${e.id},'${m}')">รายละเอียด</button>`:''}
+        ${CU?.role!=='admin'?`<button class="btn btn-primary btn-sm" onclick="openEvalFor(${e.id})">${ev?'แก้ไข':'ประเมิน'}</button>`:''}
+        ${ev?`<button class="btn btn-outline btn-sm" onclick="viewScore(${e.id},'${m}')">${CU?.role==='admin'?'ดูคะแนน':'รายละเอียด'}</button>`:''}
       </td></tr>`;
   }).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">ไม่พบข้อมูล</td></tr>';
 }
@@ -1404,8 +1406,10 @@ function renderSummary(){
 }
 
 function viewScore(eid,month){
-  // ดูเฉพาะคะแนนที่หัวหน้าคนนี้ประเมินเอง
-  const ev=S.evaluations.find(e=>e.eid===eid&&e.month===month&&e.by===CU?.username);
+  // admin เห็นคะแนนล่าสุด, หัวหน้าเห็นเฉพาะที่ตัวเองประเมิน
+  const ev=CU?.role==='admin'
+    ? S.evaluations.filter(e=>e.eid===eid&&e.month===month).sort((a,b)=>new Date(b.at||0)-new Date(a.at||0))[0]
+    : S.evaluations.find(e=>e.eid===eid&&e.month===month&&e.by===CU?.username);
   const emp=S.employees.find(e=>e.id===eid);if(!ev||!emp)return;
   const st=S.skillTopics[emp.dept]||[];const bt=S.behavTopics;
   let h=`<div style="background:linear-gradient(135deg,#f0fdf4,#e0f2fe);border-radius:12px;padding:18px;margin-bottom:16px;text-align:center;">
