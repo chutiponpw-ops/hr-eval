@@ -1081,7 +1081,9 @@ function renderDash(){
 
   const emps = myEmps();
   const myD = myDepts();
-  const doneEvs = S.evaluations.filter(e=>e.month===month);
+  // admin เห็นทุกคะแนน, หัวหน้าเห็นเฉพาะที่ตัวเองประเมิน
+  const allEvs = S.evaluations.filter(e=>e.month===month);
+  const doneEvs = CU?.role==='admin' ? allEvs : allEvs.filter(e=>e.by===CU?.username);
   const doneSet = new Set(doneEvs.map(e=>e.eid));
   const myEmpIds = new Set(emps.map(e=>e.id));
   const myDoneEvs = doneEvs.filter(e=>myEmpIds.has(e.eid));
@@ -1258,11 +1260,12 @@ function renderResList(){
   const m=mf||curMonth();
 
   document.getElementById('res-table').innerHTML=list.map(e=>{
-    const ev=S.evaluations.find(x=>x.eid===e.id&&x.month===m);
+    // แสดงเฉพาะคะแนนที่หัวหน้าคนนี้ประเมินเอง
+    const ev=S.evaluations.find(x=>x.eid===e.id&&x.month===m&&x.by===CU?.username);
     const badge=ev?`<span class="tag tag-g">✅ ${ev.totalScore}%</span>`:`<span class="tag tag-y">⏳ รอประเมิน</span>`;
     return`<tr>
       <td style="color:var(--muted);font-size:12px;">${e.code||'-'}</td>
-      <td style="font-weight:600;">${e.name}</td>
+      <td><div style="font-weight:600;">${e.name}</div><div style="font-size:12px;color:var(--muted);">${e.code||''}</div></td>
       <td><span class="tag tag-b">${e.dept}</span></td>
       <td>${badge}</td>
       <td>
@@ -1294,11 +1297,12 @@ function loadEvalForm(){
   const month=document.getElementById('ev-month').value;
   if(!eid||!month){toast('กรุณาเลือกพนักงานและเดือน','warn');return;}
   const emp=S.employees.find(e=>e.id===eid);if(!emp)return;
-  document.getElementById('ev-emp-name').textContent=emp.name;
+  document.getElementById('ev-emp-name').textContent=emp.name+(emp.code?' ('+emp.code+')':'');
   document.getElementById('ev-emp-dept').textContent=emp.dept+(emp.pos?' | '+emp.pos:'');
   const st=S.skillTopics[emp.dept]||[];
   const bt=S.behavTopics;
-  const ex=S.evaluations.find(e=>e.eid===eid&&e.month===month);
+  // โหลดเฉพาะคะแนนที่หัวหน้าคนนี้ประเมินเอง
+  const ex=S.evaluations.find(e=>e.eid===eid&&e.month===month&&e.by===CU?.username);
   const sc=ex?ex.scores:{};
   const sn=S.sectionNames||{sec4:'ส่วนที่ 4 — ความชำนาญในการทำงาน ฝีมือ และความตั้งใจ',sec5:'ส่วนที่ 5 — พฤติกรรมของพนักงาน'};
   let html=buildSection(sn.sec4,st,'s',sc);
@@ -1365,7 +1369,8 @@ function saveEval(){
   const sm=st.length*5,bm=bt.length*5;
   const sp=sm?Math.round(sv/sm*100):0,bp=bm?Math.round(bv/bm*100):0;
   const total=Math.round((sp+bp)/2);
-  S.evaluations=S.evaluations.filter(e=>!(e.eid===eid&&e.month===month));
+  // กรองเฉพาะคะแนนของหัวหน้าคนนี้ (ไม่ลบคะแนนหัวหน้าคนอื่น)
+  S.evaluations=S.evaluations.filter(e=>!(e.eid===eid&&e.month===month&&e.by===CU?.username));
   S.evaluations.push({eid,month,scores,skillPct:sp,behavPct:bp,totalScore:total,by:CU?.username,at:new Date().toISOString()});
   save();toast('บันทึกการประเมินเรียบร้อย ✅','ok');
   renderDash();renderResList();
@@ -1385,22 +1390,26 @@ function renderSummary(){
   const df=document.getElementById('sum-dept')?.value||'';
   const mf=document.getElementById('sum-month')?.value||'';
   const myIds=new Set(myEmps().map(e=>e.id));
-  let evs=S.evaluations.filter(e=>myIds.has(e.eid));
+  // admin เห็นทุกคะแนน, หัวหน้าเห็นเฉพาะที่ตัวเองประเมิน
+  let evs=CU?.role==='admin'
+    ? S.evaluations.filter(e=>myIds.has(e.eid))
+    : S.evaluations.filter(e=>myIds.has(e.eid)&&e.by===CU?.username);
   if(mf)evs=evs.filter(e=>e.month===mf);
   document.getElementById('sum-table').innerHTML=evs.map(ev=>{
     const emp=S.employees.find(e=>e.id===ev.eid);if(!emp)return'';
     if(df&&emp.dept!==df)return'';
     const lv=ev.totalScore>=80?'<span class="tag tag-g">ดีมาก</span>':ev.totalScore>=60?'<span class="tag tag-b">ดี</span>':ev.totalScore>=40?'<span class="tag tag-y">พอใช้</span>':'<span class="tag tag-r">ต้องปรับปรุง</span>';
-    return`<tr><td style="color:var(--muted);font-size:12px;">${emp.code||'-'}</td><td>${emp.name}</td><td><span class="tag tag-b">${emp.dept}</span></td><td>${ev.month}</td><td>${ev.skillPct}%</td><td>${ev.behavPct}%</td><td><strong>${ev.totalScore}%</strong></td><td>${lv}</td><td><button class="btn btn-outline btn-sm" onclick="viewScore(${ev.eid},'${ev.month}')">ดู</button></td></tr>`;
+    return`<tr><td style="color:var(--muted);font-size:12px;">${emp.code||''}</td><td><div>${emp.name}</div><div style="font-size:12px;color:var(--muted);">${emp.code||''}</div></td><td><span class="tag tag-b">${emp.dept}</span></td><td>${ev.month}</td><td>${ev.skillPct}%</td><td>${ev.behavPct}%</td><td><strong>${ev.totalScore}%</strong></td><td>${lv}</td><td><button class="btn btn-outline btn-sm" onclick="viewScore(${ev.eid},'${ev.month}')">ดู</button></td></tr>`;
   }).filter(Boolean).join('')||'<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px;">ยังไม่มีผลการประเมิน</td></tr>';
 }
 
 function viewScore(eid,month){
-  const ev=S.evaluations.find(e=>e.eid===eid&&e.month===month);
+  // ดูเฉพาะคะแนนที่หัวหน้าคนนี้ประเมินเอง
+  const ev=S.evaluations.find(e=>e.eid===eid&&e.month===month&&e.by===CU?.username);
   const emp=S.employees.find(e=>e.id===eid);if(!ev||!emp)return;
   const st=S.skillTopics[emp.dept]||[];const bt=S.behavTopics;
   let h=`<div style="background:linear-gradient(135deg,#f0fdf4,#e0f2fe);border-radius:12px;padding:18px;margin-bottom:16px;text-align:center;">
-    <div style="font-size:20px;font-weight:800;color:#1a3a5c;margin-bottom:4px;">${emp.name}</div>
+    <div style="font-size:20px;font-weight:800;color:#1a3a5c;margin-bottom:2px;">${emp.name}</div><div style="font-size:13px;color:var(--muted);margin-bottom:4px;">${emp.code||''}</div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:14px;">${emp.dept} — เดือน ${month}</div>
     <div style="display:flex;justify-content:center;gap:0;flex-wrap:wrap;">
       <div style="flex:1;min-width:90px;padding:10px;border-right:1px solid #d1fae5;">
@@ -1459,7 +1468,7 @@ function renderEmpTable(){
   const sf=(document.getElementById('emp-search')?.value||'').toLowerCase();
   const list=myEmps().filter(e=>(!df||e.dept===df)&&(!sf||e.name.toLowerCase().includes(sf)));
   document.getElementById('emp-table').innerHTML=list.map((e,i)=>
-    `<tr><td style="color:var(--muted);font-size:12px;">${e.code||i+1}</td><td style="font-weight:600;">${e.name}</td><td><span class="tag tag-b">${e.dept}</span></td><td>${e.pos||'-'}</td>
+    `<tr><td style="color:var(--muted);font-size:12px;">${e.code||i+1}</td><td><div style="font-weight:600;">${e.name}</div><div style="font-size:12px;color:var(--muted);">${e.code||''}</div></td><td><span class="tag tag-b">${e.dept}</span></td><td>${e.pos||'-'}</td>
     <td><button class="btn btn-outline btn-sm" onclick="editEmp(${e.id})">✏️</button>
     <button class="btn btn-danger btn-sm" onclick="delEmp(${e.id})">🗑️</button></td></tr>`
   ).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px;">ไม่พบพนักงาน</td></tr>';
@@ -1843,7 +1852,10 @@ function doExport(){
       '',...skillTopics,'','',...behavTopics];
     const rows=[header,topicRow];
     emps.forEach(emp=>{
-      const ev=S.evaluations.find(e=>e.eid===emp.id&&e.month===m);
+      // admin เห็นทุกคะแนน, หัวหน้าเห็นเฉพาะที่ตัวเองประเมิน
+    const ev=CU?.role==='admin'
+      ? S.evaluations.filter(e=>e.eid===emp.id&&e.month===m).sort((a,b)=>new Date(b.at)-new Date(a.at))[0]
+      : S.evaluations.find(e=>e.eid===emp.id&&e.month===m&&e.by===CU?.username);
       const lv=ev?(ev.totalScore>=80?'ดีมาก':ev.totalScore>=60?'ดี':ev.totalScore>=40?'พอใช้':'ต้องปรับปรุง'):'รอประเมิน';
       const skillScores=skillTopics.map((_,i)=>ev?ev.scores['s_'+i]||'-':'');
       const behavScores=behavTopics.map((_,i)=>ev?ev.scores['b_'+i]||'-':'');
