@@ -73,15 +73,42 @@ body{font-family:'Sarabun',Arial,sans-serif;background:var(--bg);min-height:100v
 
 /* EMP TABLES */
 .emp-row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
-.emp-table{width:100%;border-collapse:collapse;font-size:15px}
-.emp-table th{text-align:left;padding:9px 10px;color:var(--gray);font-weight:600;border-bottom:2px solid var(--border);font-size:14px}
-.emp-table td{padding:10px 10px;border-bottom:1px solid #f8fafc;color:#1e293b;vertical-align:middle}
+.emp-table{width:100%;border-collapse:collapse;font-size:14px;table-layout:fixed}
+.emp-table th{
+  text-align:center;padding:10px 8px;
+  color:#fff;font-weight:700;font-size:13px;
+  background:#1a3a5c;
+  border-bottom:none;
+  letter-spacing:.3px;
+  white-space:nowrap
+}
+.emp-table th:nth-child(1){width:40px;border-radius:8px 0 0 0}
+.emp-table th:nth-child(2){width:30%;text-align:left}
+.emp-table th:nth-child(3){width:28%;text-align:left}
+.emp-table th:nth-child(4){width:12%}
+.emp-table th:nth-child(5){width:13%}
+.emp-table th:nth-child(6){width:13%;border-radius:0 8px 0 0}
+.emp-table td{padding:10px 8px;border-bottom:1px solid #f1f5f9;color:#1e293b;vertical-align:middle;text-align:center}
+.emp-table td:nth-child(2),.emp-table td:nth-child(3){text-align:left}
 .emp-table tr:last-child td{border-bottom:none}
-.badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:14px;font-weight:700}
+.emp-table tbody tr:hover td{background:#f8fafc}
+
+/* evaluator chip */
+.eval-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  background:#eff6ff;color:#1d4ed8;
+  border:1px solid #bfdbfe;
+  border-radius:20px;padding:3px 10px;
+  font-size:12px;font-weight:600;
+  white-space:nowrap;max-width:100%;
+  overflow:hidden;text-overflow:ellipsis
+}
+.eval-chip-wrap{display:flex;flex-wrap:wrap;gap:4px}
+.badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:700}
 .badge-hi{background:#dcfce7;color:#166534}
 .badge-mid{background:#fef3c7;color:#92400e}
 .badge-lo{background:#fee2e2;color:#991b1b}
-.rank-num{color:#94a3b8;font-size:14px}
+.rank-num{color:#94a3b8;font-size:13px;font-weight:600}
 
 /* EXPORT BTN */
 .export-btn{background:#fff;border:1.5px solid var(--blue);color:var(--blue);padding:7px 14px;border-radius:8px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:600}
@@ -96,7 +123,7 @@ body{font-family:'Sarabun',Arial,sans-serif;background:var(--bg);min-height:100v
 .dept-back{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:8px 16px;border-radius:8px;font-size:16px;cursor:pointer}
 .dept-title{font-size:20px;font-weight:700;color:#fff;flex:1}
 .dept-subtitle{font-size:14px;color:rgba(255,255,255,.7)}
-.dept-content{padding:16px;max-width:800px;margin:0 auto;padding-bottom:30px;flex:1}
+.dept-content{padding:16px;max-width:960px;margin:0 auto;padding-bottom:30px;flex:1}
 
 /* LOADING / ERROR */
 .loading{text-align:center;padding:60px;font-size:18px;color:var(--gray)}
@@ -206,7 +233,7 @@ body{font-family:'Sarabun',Arial,sans-serif;background:var(--bg);min-height:100v
   <div class="dept-content">
     <div class="card">
       <table class="emp-table">
-        <thead><tr><th>#</th><th>ชื่อพนักงาน</th><th style="text-align:center">ฝีมือ</th><th style="text-align:center">พฤติกรรม</th><th style="text-align:center">รวม</th></tr></thead>
+        <thead><tr><th>#</th><th>ชื่อพนักงาน</th><th>ผู้ประเมิน</th><th>ฝีมือ</th><th>พฤติกรรม</th><th>รวม (เฉลี่ย)</th></tr></thead>
         <tbody id="dept-emp-list"></tbody>
       </table>
     </div>
@@ -265,39 +292,60 @@ function renderAll(){
   var empMap={};
   if(S.employees)S.employees.forEach(function(e){empMap[e.id]=e});
 
+  // สร้าง map username → ชื่อแสดง จาก S.users (ตรงกับ index.html ที่ใช้ ev.by)
+  var userMap={};
+  if(S.users)S.users.forEach(function(u){
+    userMap[u.username]=u.display||u.name||u.username;
+  });
+
   var empScores={}, deptData={};
   evals.forEach(function(ev){
     var score=calcScore(ev);
     var eid=ev.eid!==undefined?ev.eid:(ev.employeeId||'');
     var info=empMap[eid]||{};
     var dept=info.dept||ev.department||'';
+    // ชื่อผู้ประเมิน: ดึงจาก ev.by (username) แล้ว lookup ชื่อจริงใน userMap
+    // รองรับ field สำรองอื่นๆ ด้วย
+    var byUsername=ev.by||ev.evaluatorName||ev.managerName||ev.evaluator||ev.manager||'';
+    var evaluatorName=byUsername?(userMap[byUsername]||byUsername):'';
     if(eid!==''){
-      if(!empScores[eid])empScores[eid]={total:0,cnt:0,dept:dept,info:info,skill:0,behav:0};
+      if(!empScores[eid])empScores[eid]={total:0,cnt:0,dept:dept,info:info,skill:0,behav:0,evaluators:[]};
       empScores[eid].total+=score;
       empScores[eid].skill+=parseFloat(ev.skillPct)||0;
       empScores[eid].behav+=parseFloat(ev.behavPct)||0;
       empScores[eid].cnt++;
+      if(evaluatorName && empScores[eid].evaluators.indexOf(evaluatorName)===-1){
+        empScores[eid].evaluators.push(evaluatorName);
+      }
     }
     if(dept){
       if(!deptData[dept])deptData[dept]={total:0,cnt:0,emps:{}};
       deptData[dept].total+=score;deptData[dept].cnt++;
       if(eid!==''){
-        if(!deptData[dept].emps[eid])deptData[dept].emps[eid]={name:info.name||String(eid),code:info.code||'',total:0,skill:0,behav:0,cnt:0};
+        if(!deptData[dept].emps[eid])deptData[dept].emps[eid]={name:info.name||String(eid),code:info.code||'',total:0,skill:0,behav:0,cnt:0,evaluators:[]};
         deptData[dept].emps[eid].total+=score;
         deptData[dept].emps[eid].skill+=parseFloat(ev.skillPct)||0;
         deptData[dept].emps[eid].behav+=parseFloat(ev.behavPct)||0;
         deptData[dept].emps[eid].cnt++;
+        if(evaluatorName && deptData[dept].emps[eid].evaluators.indexOf(evaluatorName)===-1){
+          deptData[dept].emps[eid].evaluators.push(evaluatorName);
+        }
       }
     }
   });
 
   _empList=Object.entries(empScores).map(function(kv){
     var id=kv[0],v=kv[1];
-    return{id:id,code:v.info.code||'',name:v.info.name||id,dept:v.dept||'-',
+    return{id:id,code:v.info.code||'',name:v.info.name||'',dept:v.dept||'-',
       avg:v.cnt?+(v.total/v.cnt).toFixed(1):0,
       skill:v.cnt?+(v.skill/v.cnt).toFixed(1):0,
-      behav:v.cnt?+(v.behav/v.cnt).toFixed(1):0};
-  }).sort(function(a,b){return b.avg-a.avg});
+      behav:v.cnt?+(v.behav/v.cnt).toFixed(1):0,
+      evalCnt:v.cnt,
+      evaluators:v.evaluators||[]};
+  })
+  .filter(function(e){ return e.name && e.name.trim()!==''; })
+  .filter(function(e){ return e.avg > 0; })
+  .sort(function(a,b){return b.avg-a.avg});
 
   _deptList=Object.entries(deptData).map(function(kv){
     var name=kv[0],v=kv[1];
@@ -306,8 +354,12 @@ function renderAll(){
       return{id:eid,name:ed.name,code:ed.code,
         score:ed.cnt?+(ed.total/ed.cnt).toFixed(1):0,
         skill:ed.cnt?+(ed.skill/ed.cnt).toFixed(1):0,
-        behav:ed.cnt?+(ed.behav/ed.cnt).toFixed(1):0};
-    }).sort(function(a,b){return b.score-a.score});
+        behav:ed.cnt?+(ed.behav/ed.cnt).toFixed(1):0,
+        evalCnt:ed.cnt,
+        evaluators:ed.evaluators||[]};
+    })
+    .filter(function(e){ return e.name && e.name.trim()!=='' && e.score>0; })
+    .sort(function(a,b){return b.score-a.score});
     return{name:name,avg:v.cnt?+(v.total/v.cnt).toFixed(1):0,cnt:v.cnt,emps:emps};
   }).sort(function(a,b){return b.avg-a.avg});
 
@@ -442,18 +494,28 @@ function openDeptPage(idx){
   if(!d)return;
   // reset thead
   document.querySelector('#dept-emp-list').closest('table').querySelector('thead tr').innerHTML=
-    '<th>#</th><th>ชื่อพนักงาน</th><th style="text-align:center">ฝีมือ</th><th style="text-align:center">พฤติกรรม</th><th style="text-align:center">รวม</th>';
+    '<th>#</th><th>ชื่อพนักงาน</th><th>ผู้ประเมิน</th><th>ฝีมือ</th><th>พฤติกรรม</th><th>รวม (เฉลี่ย)</th>';
   document.getElementById('dept-page-name').textContent=d.name;
   document.getElementById('dept-page-avg').textContent='คะแนนเฉลี่ย: '+d.avg+' | พนักงาน '+d.emps.length+' คน';
   document.getElementById('dept-emp-list').innerHTML=d.emps.length===0?
-    '<tr><td colspan="5" class="no-data">ไม่มีข้อมูล</td></tr>':
+    '<tr><td colspan="6" class="no-data">ไม่มีข้อมูล</td></tr>':
     d.emps.map(function(e,i){
+      // สร้าง chip สำหรับผู้ประเมินแต่ละคน
+      var evalHtml=e.evaluators.length>0
+        ? '<div class="eval-chip-wrap">'+
+            e.evaluators.map(function(n){return'<span class="eval-chip">👤 '+n+'</span>';}).join('')+
+          '</div>'
+        : '<span style="color:#cbd5e1;font-size:12px">—</span>';
+      var cntLabel=e.evalCnt>1
+        ? ' <span style="font-size:11px;color:#94a3b8;font-weight:400">('+e.evalCnt+' ครั้ง)</span>'
+        : '';
       return '<tr>'+
         '<td class="rank-num">'+(i+1)+'</td>'+
         '<td style="font-weight:600">'+e.name+'</td>'+
-        '<td style="text-align:center"><span class="badge '+badgeClass(e.skill)+'">'+e.skill+'%</span></td>'+
-        '<td style="text-align:center"><span class="badge '+badgeClass(e.behav)+'">'+e.behav+'%</span></td>'+
-        '<td style="text-align:center"><span class="badge '+badgeClass(e.score)+'">'+e.score+'</span></td>'+
+        '<td>'+evalHtml+'</td>'+
+        '<td><span class="badge '+badgeClass(e.skill)+'">'+e.skill+'%</span></td>'+
+        '<td><span class="badge '+badgeClass(e.behav)+'">'+e.behav+'%</span></td>'+
+        '<td><span class="badge '+badgeClass(e.score)+'">'+e.score+'</span>'+cntLabel+'</td>'+
       '</tr>';
     }).join('');
   var dp=document.getElementById('dept-page');
@@ -507,8 +569,10 @@ function exportDeptExcel(){
   var d=_deptList[_curDeptIdx];
   if(!d)return;
   var wb=XLSX.utils.book_new();
-  var rows=d.emps.map(function(e,i){return[i+1,e.name,e.skill,e.behav,e.score]});
-  XLSX.utils.book_append_sheet(wb,toWS(['#','ชื่อพนักงาน','ฝีมือ%','พฤติกรรม%','รวม'],rows),d.name.substring(0,31));
+  var rows=d.emps.map(function(e,i){
+    return[i+1,e.name,e.evaluators.join(', '),e.evalCnt,e.skill,e.behav,e.score];
+  });
+  XLSX.utils.book_append_sheet(wb,toWS(['#','ชื่อพนักงาน','ผู้ประเมิน','จำนวนครั้งที่ถูกประเมิน','ฝีมือ%','พฤติกรรม%','รวม(เฉลี่ย)'],rows),d.name.substring(0,31));
   saveXL(wb,'dept_'+d.name);
 }
 
