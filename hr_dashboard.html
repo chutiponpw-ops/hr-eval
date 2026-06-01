@@ -73,42 +73,15 @@ body{font-family:'Sarabun',Arial,sans-serif;background:var(--bg);min-height:100v
 
 /* EMP TABLES */
 .emp-row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
-.emp-table{width:100%;border-collapse:collapse;font-size:14px;table-layout:fixed}
-.emp-table th{
-  text-align:center;padding:10px 8px;
-  color:#fff;font-weight:700;font-size:13px;
-  background:#1a3a5c;
-  border-bottom:none;
-  letter-spacing:.3px;
-  white-space:nowrap
-}
-.emp-table th:nth-child(1){width:40px;border-radius:8px 0 0 0}
-.emp-table th:nth-child(2){width:30%;text-align:left}
-.emp-table th:nth-child(3){width:28%;text-align:left}
-.emp-table th:nth-child(4){width:12%}
-.emp-table th:nth-child(5){width:13%}
-.emp-table th:nth-child(6){width:13%;border-radius:0 8px 0 0}
-.emp-table td{padding:10px 8px;border-bottom:1px solid #f1f5f9;color:#1e293b;vertical-align:middle;text-align:center}
-.emp-table td:nth-child(2),.emp-table td:nth-child(3){text-align:left}
+.emp-table{width:100%;border-collapse:collapse;font-size:15px}
+.emp-table th{text-align:left;padding:9px 10px;color:var(--gray);font-weight:600;border-bottom:2px solid var(--border);font-size:14px}
+.emp-table td{padding:10px 10px;border-bottom:1px solid #f8fafc;color:#1e293b;vertical-align:middle}
 .emp-table tr:last-child td{border-bottom:none}
-.emp-table tbody tr:hover td{background:#f8fafc}
-
-/* evaluator chip */
-.eval-chip{
-  display:inline-flex;align-items:center;gap:4px;
-  background:#eff6ff;color:#1d4ed8;
-  border:1px solid #bfdbfe;
-  border-radius:20px;padding:3px 10px;
-  font-size:12px;font-weight:600;
-  white-space:nowrap;max-width:100%;
-  overflow:hidden;text-overflow:ellipsis
-}
-.eval-chip-wrap{display:flex;flex-wrap:wrap;gap:4px}
-.badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:700}
+.badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:14px;font-weight:700}
 .badge-hi{background:#dcfce7;color:#166534}
 .badge-mid{background:#fef3c7;color:#92400e}
 .badge-lo{background:#fee2e2;color:#991b1b}
-.rank-num{color:#94a3b8;font-size:13px;font-weight:600}
+.rank-num{color:#94a3b8;font-size:14px}
 
 /* EXPORT BTN */
 .export-btn{background:#fff;border:1.5px solid var(--blue);color:var(--blue);padding:7px 14px;border-radius:8px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:6px;font-weight:600}
@@ -123,12 +96,32 @@ body{font-family:'Sarabun',Arial,sans-serif;background:var(--bg);min-height:100v
 .dept-back{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:8px 16px;border-radius:8px;font-size:16px;cursor:pointer}
 .dept-title{font-size:20px;font-weight:700;color:#fff;flex:1}
 .dept-subtitle{font-size:14px;color:rgba(255,255,255,.7)}
-.dept-content{padding:16px;max-width:960px;margin:0 auto;padding-bottom:30px;flex:1}
+.dept-content{padding:16px;max-width:800px;margin:0 auto;padding-bottom:30px;flex:1}
 
 /* LOADING / ERROR */
 .loading{text-align:center;padding:60px;font-size:18px;color:var(--gray)}
 .error-box{background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:20px;color:#991b1b;font-size:16px}
 .no-data{text-align:center;padding:24px;color:#94a3b8;font-size:15px}
+
+/* ── คะแนนจริงแยกผู้ประเมิน ── */
+.emp-main-row.expandable{cursor:pointer}
+.emp-main-row.expandable:hover td{background:#f0f7ff}
+.expand-icon{font-size:11px;color:#94a3b8;margin-left:4px;vertical-align:middle}
+.avg-label{font-size:10px;color:#94a3b8;margin-top:2px;text-align:center}
+.eval-chip{display:inline-flex;align-items:center;gap:3px;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:20px;padding:3px 9px;font-size:12px;font-weight:600;white-space:nowrap}
+.eval-chip-sub{background:#f0fdf4;color:#166534;border-color:#bbf7d0}
+/* sub-score table */
+.sub-score-table{width:100%;border-collapse:collapse;font-size:13px;background:#f8fafc}
+.sub-score-table thead th{background:#e2e8f0;color:#475569;padding:7px 12px;font-size:11px;font-weight:700;text-align:left;letter-spacing:.4px}
+.sub-score-table thead th:nth-child(3),
+.sub-score-table thead th:nth-child(4),
+.sub-score-table thead th:nth-child(5){text-align:center}
+.sub-row td{padding:8px 12px;border-bottom:1px solid #e2e8f0;background:#f8fafc}
+.sub-avg-row td{padding:8px 12px;background:#fffbeb;border-top:2px solid #fcd34d;font-weight:700}
+.badge-real{box-shadow:0 0 0 2px #3b82f6}
+.badge-avg{box-shadow:0 0 0 2px #f59e0b}
+.records-row>td{padding:0!important}
+.dept-content{max-width:960px}
 
 @media(max-width:600px){
   .kpi-row{grid-template-columns:1fr}
@@ -233,7 +226,7 @@ body{font-family:'Sarabun',Arial,sans-serif;background:var(--bg);min-height:100v
   <div class="dept-content">
     <div class="card">
       <table class="emp-table">
-        <thead><tr><th>#</th><th>ชื่อพนักงาน</th><th>ผู้ประเมิน</th><th>ฝีมือ</th><th>พฤติกรรม</th><th>รวม (เฉลี่ย)</th></tr></thead>
+        <thead><tr><th>#</th><th>ชื่อพนักงาน</th><th style="text-align:center">ฝีมือ</th><th style="text-align:center">พฤติกรรม</th><th style="text-align:center">รวม</th></tr></thead>
         <tbody id="dept-emp-list"></tbody>
       </table>
     </div>
@@ -292,7 +285,7 @@ function renderAll(){
   var empMap={};
   if(S.employees)S.employees.forEach(function(e){empMap[e.id]=e});
 
-  // สร้าง map username → ชื่อแสดง จาก S.users (ตรงกับ index.html ที่ใช้ ev.by)
+  // สร้าง userMap: username → ชื่อแสดง
   var userMap={};
   if(S.users)S.users.forEach(function(u){
     userMap[u.username]=u.display||u.name||u.username;
@@ -304,30 +297,44 @@ function renderAll(){
     var eid=ev.eid!==undefined?ev.eid:(ev.employeeId||'');
     var info=empMap[eid]||{};
     var dept=info.dept||ev.department||'';
-    // ชื่อผู้ประเมิน: ดึงจาก ev.by (username) แล้ว lookup ชื่อจริงใน userMap
-    // รองรับ field สำรองอื่นๆ ด้วย
+    // ชื่อผู้ประเมินจริง
     var byUsername=ev.by||ev.evaluatorName||ev.managerName||ev.evaluator||ev.manager||'';
     var evaluatorName=byUsername?(userMap[byUsername]||byUsername):'';
-    if(eid!==''){
-      if(!empScores[eid])empScores[eid]={total:0,cnt:0,dept:dept,info:info,skill:0,behav:0,evaluators:[]};
+
+    if(eid!==''&&info.name){
+      if(!empScores[eid])empScores[eid]={total:0,cnt:0,dept:dept,info:info,skill:0,behav:0,evaluators:[],records:[]};
       empScores[eid].total+=score;
       empScores[eid].skill+=parseFloat(ev.skillPct)||0;
       empScores[eid].behav+=parseFloat(ev.behavPct)||0;
       empScores[eid].cnt++;
-      if(evaluatorName && empScores[eid].evaluators.indexOf(evaluatorName)===-1){
+      // เก็บ record จริงแต่ละครั้ง
+      empScores[eid].records.push({
+        evaluator: evaluatorName||byUsername||'ไม่ระบุ',
+        skill: parseFloat(ev.skillPct)||0,
+        behav: parseFloat(ev.behavPct)||0,
+        score: score,
+        month: ev.month||''
+      });
+      if(evaluatorName&&empScores[eid].evaluators.indexOf(evaluatorName)===-1){
         empScores[eid].evaluators.push(evaluatorName);
       }
     }
     if(dept){
       if(!deptData[dept])deptData[dept]={total:0,cnt:0,emps:{}};
-      deptData[dept].total+=score;deptData[dept].cnt++;
-      if(eid!==''){
-        if(!deptData[dept].emps[eid])deptData[dept].emps[eid]={name:info.name||String(eid),code:info.code||'',total:0,skill:0,behav:0,cnt:0,evaluators:[]};
+      if(score>0){deptData[dept].total+=score;deptData[dept].cnt++;}
+      if(eid!==''&&info.name){
+        if(!deptData[dept].emps[eid])deptData[dept].emps[eid]={name:info.name,code:info.code||'',total:0,skill:0,behav:0,cnt:0,evaluators:[],records:[]};
         deptData[dept].emps[eid].total+=score;
         deptData[dept].emps[eid].skill+=parseFloat(ev.skillPct)||0;
         deptData[dept].emps[eid].behav+=parseFloat(ev.behavPct)||0;
         deptData[dept].emps[eid].cnt++;
-        if(evaluatorName && deptData[dept].emps[eid].evaluators.indexOf(evaluatorName)===-1){
+        deptData[dept].emps[eid].records.push({
+          evaluator:evaluatorName||byUsername||'ไม่ระบุ',
+          skill:parseFloat(ev.skillPct)||0,
+          behav:parseFloat(ev.behavPct)||0,
+          score:score
+        });
+        if(evaluatorName&&deptData[dept].emps[eid].evaluators.indexOf(evaluatorName)===-1){
           deptData[dept].emps[eid].evaluators.push(evaluatorName);
         }
       }
@@ -340,11 +347,9 @@ function renderAll(){
       avg:v.cnt?+(v.total/v.cnt).toFixed(1):0,
       skill:v.cnt?+(v.skill/v.cnt).toFixed(1):0,
       behav:v.cnt?+(v.behav/v.cnt).toFixed(1):0,
-      evalCnt:v.cnt,
-      evaluators:v.evaluators||[]};
+      evalCnt:v.cnt,evaluators:v.evaluators,records:v.records};
   })
-  .filter(function(e){ return e.name && e.name.trim()!==''; })
-  .filter(function(e){ return e.avg > 0; })
+  .filter(function(e){return e.name&&e.name.trim()!==''&&e.avg>0;})
   .sort(function(a,b){return b.avg-a.avg});
 
   _deptList=Object.entries(deptData).map(function(kv){
@@ -355,10 +360,9 @@ function renderAll(){
         score:ed.cnt?+(ed.total/ed.cnt).toFixed(1):0,
         skill:ed.cnt?+(ed.skill/ed.cnt).toFixed(1):0,
         behav:ed.cnt?+(ed.behav/ed.cnt).toFixed(1):0,
-        evalCnt:ed.cnt,
-        evaluators:ed.evaluators||[]};
+        evalCnt:ed.cnt,evaluators:ed.evaluators,records:ed.records};
     })
-    .filter(function(e){ return e.name && e.name.trim()!=='' && e.score>0; })
+    .filter(function(e){return e.name&&e.name.trim()!==''&&e.score>0;})
     .sort(function(a,b){return b.score-a.score});
     return{name:name,avg:v.cnt?+(v.total/v.cnt).toFixed(1):0,cnt:v.cnt,emps:emps};
   }).sort(function(a,b){return b.avg-a.avg});
@@ -369,23 +373,19 @@ function renderAll(){
   var evalCnt=evals.length;
   var evalPct=totalEmp?(evalCnt/totalEmp*100).toFixed(2)+'%':'0%';
 
-  // เกรด
   var gradeA=_empList.filter(function(e){return e.avg>=85}).length;
   var gradeB=_empList.filter(function(e){return e.avg>=75&&e.avg<85}).length;
   var gradeC=_empList.filter(function(e){return e.avg>=65&&e.avg<75}).length;
   var gradeD=_empList.filter(function(e){return e.avg<65}).length;
 
-  // page title
   var mLabel=month?'ประจำเดือน '+formatMonthTH(month):'ทุกเดือน';
   document.getElementById('page-title').textContent='ภาพรวมการประเมินผลพนักงาน '+mLabel;
 
-  // KPI
   document.getElementById('kpi-row').innerHTML=
     kpiCard('blue','👥',totalAvg,'คะแนนเฉลี่ยทั้งบริษัท','จากพนักงาน '+totalEmp+' คน','')+
     kpiCard('green','✅',evalCnt,'ประเมินแล้ว','คน','green',evalPct)+
     kpiCard('purple','🏢',totalDept,'แผนกทั้งหมด','แผนก','');
 
-  // dept bars (show top 5 + last 1)
   var show=_deptList.slice(0,5);
   var last=_deptList.length>6?[_deptList[_deptList.length-1]]:[];
   var barsHtml=show.map(function(d,i){return deptBarRow(d,i)}).join('');
@@ -394,10 +394,8 @@ function renderAll(){
   document.getElementById('dept-bars').innerHTML=barsHtml;
   document.getElementById('dept-bar-title').textContent='คะแนนเฉลี่ยแยกตามแผนก ('+totalDept+' แผนก)';
 
-  // donut
   renderDonut(gradeA,gradeB,gradeC,gradeD,totalEmp);
 
-  // top/bot
   var top10=_empList.slice(0,10);
   var bot10=[].concat(_empList).sort(function(a,b){return a.avg-b.avg}).slice(0,10);
   document.getElementById('top-list').innerHTML=empRows(top10);
@@ -470,7 +468,6 @@ function renderDonut(a,b,c,d,total){
 }
 
 function showAllDepts(){
-  // เปิดหน้ารายการแผนกทั้งหมด (ใช้ dept-page กับ index พิเศษ -1)
   _curDeptIdx=-1;
   document.getElementById('dept-page-name').textContent='คะแนนเฉลี่ยทุกแผนก';
   document.getElementById('dept-page-avg').textContent='ทั้งหมด '+_deptList.length+' แผนก';
@@ -482,45 +479,127 @@ function showAllDepts(){
       '<td style="color:#94a3b8">›</td>'+
     '</tr>';
   }).join('');
-  // ปรับ header ตาราง
   document.querySelector('#dept-emp-list').closest('table').querySelector('thead tr').innerHTML=
     '<th>แผนก</th><th>คะแนนเฉลี่ย</th><th>จำนวน</th><th></th>';
   document.getElementById('dept-page').classList.add('open');
 }
 
+// ══════════════════════════════════════════
+// openDeptPage — รองรับผู้ประเมิน 1 คน หรือ กี่คนก็ได้
+// ══════════════════════════════════════════
 function openDeptPage(idx){
   _curDeptIdx=idx;
   var d=_deptList[idx];
   if(!d)return;
-  // reset thead
+
   document.querySelector('#dept-emp-list').closest('table').querySelector('thead tr').innerHTML=
-    '<th>#</th><th>ชื่อพนักงาน</th><th>ผู้ประเมิน</th><th>ฝีมือ</th><th>พฤติกรรม</th><th>รวม (เฉลี่ย)</th>';
+    '<th style="width:36px">#</th>'+
+    '<th>ชื่อพนักงาน</th>'+
+    '<th>ผู้ประเมิน</th>'+
+    '<th style="text-align:center;width:80px">ฝีมือ</th>'+
+    '<th style="text-align:center;width:90px">พฤติกรรม</th>'+
+    '<th style="text-align:center;width:110px">รวม (เฉลี่ย)</th>';
   document.getElementById('dept-page-name').textContent=d.name;
   document.getElementById('dept-page-avg').textContent='คะแนนเฉลี่ย: '+d.avg+' | พนักงาน '+d.emps.length+' คน';
-  document.getElementById('dept-emp-list').innerHTML=d.emps.length===0?
-    '<tr><td colspan="6" class="no-data">ไม่มีข้อมูล</td></tr>':
-    d.emps.map(function(e,i){
-      // สร้าง chip สำหรับผู้ประเมินแต่ละคน
-      var evalHtml=e.evaluators.length>0
-        ? '<div class="eval-chip-wrap">'+
-            e.evaluators.map(function(n){return'<span class="eval-chip">👤 '+n+'</span>';}).join('')+
-          '</div>'
-        : '<span style="color:#cbd5e1;font-size:12px">—</span>';
-      var cntLabel=e.evalCnt>1
-        ? ' <span style="font-size:11px;color:#94a3b8;font-weight:400">('+e.evalCnt+' ครั้ง)</span>'
-        : '';
-      return '<tr>'+
-        '<td class="rank-num">'+(i+1)+'</td>'+
-        '<td style="font-weight:600">'+e.name+'</td>'+
-        '<td>'+evalHtml+'</td>'+
-        '<td><span class="badge '+badgeClass(e.skill)+'">'+e.skill+'%</span></td>'+
-        '<td><span class="badge '+badgeClass(e.behav)+'">'+e.behav+'%</span></td>'+
-        '<td><span class="badge '+badgeClass(e.score)+'">'+e.score+'</span>'+cntLabel+'</td>'+
-      '</tr>';
-    }).join('');
+
+  if(d.emps.length===0){
+    document.getElementById('dept-emp-list').innerHTML='<tr><td colspan="6" class="no-data">ไม่มีข้อมูล</td></tr>';
+    document.getElementById('dept-page').classList.add('open');
+    return;
+  }
+
+  var html='';
+  d.emps.forEach(function(e,i){
+    // dedup ชื่อผู้ประเมิน (กันซ้ำ)
+    var uniqueEvaluators=[...new Set((e.evaluators||[]).filter(Boolean))];
+    var totalRecords=e.records?e.records.length:0;
+    var multiEval=totalRecords>1;
+    var toggleId='rec-'+d.name.replace(/\s/g,'')+'-'+i;
+
+    // ── แถวหลัก ──
+    html+='<tr class="emp-main-row'+(multiEval?' expandable':'')+'"'
+      +(multiEval?' onclick="toggleRecords(\''+toggleId+'\')"':'')+' style="vertical-align:middle">';
+    html+='<td class="rank-num">'+(i+1)+'</td>';
+    html+='<td style="font-weight:700;color:#1a3a5c;min-width:130px">'+e.name+'</td>';
+
+    // คอลัมน์ผู้ประเมิน
+    html+='<td style="min-width:160px"><div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">';
+    if(uniqueEvaluators.length===0){
+      html+='<span style="color:#cbd5e1;font-size:12px">—</span>';
+    } else {
+      uniqueEvaluators.forEach(function(n){
+        html+='<span class="eval-chip">👤 '+n+'</span>';
+      });
+    }
+    if(multiEval){
+      html+='<span class="expand-icon" id="icon-'+toggleId+'">▼</span>';
+    }
+    html+='</div></td>';
+
+    if(multiEval){
+      // แสดงค่าเฉลี่ย + label "เฉลี่ย N ครั้ง"
+      html+='<td style="text-align:center"><span class="badge '+badgeClass(e.skill)+'">'+e.skill+'%</span>'
+          +'<div class="avg-label">เฉลี่ย</div></td>';
+      html+='<td style="text-align:center"><span class="badge '+badgeClass(e.behav)+'">'+e.behav+'%</span>'
+          +'<div class="avg-label">เฉลี่ย</div></td>';
+      html+='<td style="text-align:center"><span class="badge '+badgeClass(e.score)+' badge-avg">'+e.score+'</span>'
+          +'<div class="avg-label">เฉลี่ย '+totalRecords+' ครั้ง</div></td>';
+    } else {
+      // 1 record — แสดงตรงๆ
+      html+='<td style="text-align:center"><span class="badge '+badgeClass(e.skill)+'">'+e.skill+'%</span></td>';
+      html+='<td style="text-align:center"><span class="badge '+badgeClass(e.behav)+'">'+e.behav+'%</span></td>';
+      html+='<td style="text-align:center"><span class="badge '+badgeClass(e.score)+'">'+e.score+'</span></td>';
+    }
+    html+='</tr>';
+
+    // ── แถว sub-record (ซ่อน/แสดงได้) ──
+    if(multiEval){
+      html+='<tr id="'+toggleId+'" class="records-row" style="display:none">';
+      html+='<td colspan="6" style="padding:0!important;background:#f8fafc">';
+      html+='<table class="sub-score-table">';
+      html+='<thead><tr>'
+          +'<th style="width:36px">#</th>'
+          +'<th>ผู้ประเมิน</th>'
+          +'<th style="text-align:center;width:80px">ฝีมือ</th>'
+          +'<th style="text-align:center;width:90px">พฤติกรรม</th>'
+          +'<th style="text-align:center;width:110px">คะแนนจริง</th>'
+          +'</tr></thead><tbody>';
+
+      e.records.forEach(function(rec,ri){
+        html+='<tr class="sub-row">'
+            +'<td style="text-align:center;color:#94a3b8;font-size:12px">'+(ri+1)+'</td>'
+            +'<td><span class="eval-chip eval-chip-sub">👤 '+(rec.evaluator||'ไม่ระบุ')+'</span></td>'
+            +'<td style="text-align:center"><span class="badge '+badgeClass(rec.skill)+'">'+rec.skill+'%</span></td>'
+            +'<td style="text-align:center"><span class="badge '+badgeClass(rec.behav)+'">'+rec.behav+'%</span></td>'
+            +'<td style="text-align:center"><span class="badge '+badgeClass(rec.score)+' badge-real">'+rec.score+'</span></td>'
+            +'</tr>';
+      });
+
+      // แถวสรุป ค่าเฉลี่ยรวม
+      html+='<tr class="sub-avg-row">'
+          +'<td colspan="2" style="text-align:right;font-size:12px;padding-right:14px">📊 ค่าเฉลี่ยรวม <strong>('+totalRecords+' ครั้ง)</strong></td>'
+          +'<td style="text-align:center"><span class="badge '+badgeClass(e.skill)+'">'+e.skill+'%</span></td>'
+          +'<td style="text-align:center"><span class="badge '+badgeClass(e.behav)+'">'+e.behav+'%</span></td>'
+          +'<td style="text-align:center"><span class="badge '+badgeClass(e.score)+' badge-avg">'+e.score+'</span></td>'
+          +'</tr>';
+
+      html+='</tbody></table></td></tr>';
+    }
+  });
+
+  document.getElementById('dept-emp-list').innerHTML=html;
   var dp=document.getElementById('dept-page');
   dp.classList.add('open');
   dp.scrollTop=0;
+}
+
+function toggleRecords(id){
+  var row=document.getElementById(id);
+  var icon=document.getElementById('icon-'+id);
+  if(!row)return;
+  var isHidden=row.style.display==='none'||row.style.display==='';
+  row.style.display=isHidden?'table-row':'none';
+  if(icon)icon.textContent=isHidden?'▲':'▼';
 }
 
 function closeDeptPage(){
@@ -537,8 +616,10 @@ function saveXL(wb,name){XLSX.writeFile(wb,name+'.xlsx');}
 function exportTopExcel(){
   var month=document.getElementById('month-sel').value;
   var wb=XLSX.utils.book_new();
-  var rows=_empList.slice(0,10).map(function(e,i){return[i+1,e.code,e.name,e.dept,e.avg]});
-  XLSX.utils.book_append_sheet(wb,toWS(['#','รหัส','ชื่อพนักงาน','แผนก','คะแนน'],rows),'คะแนนสูงสุด');
+  var rows=_empList.slice(0,10).map(function(e,i){
+    return[i+1,e.code,e.name,e.dept,e.evalCnt,e.evaluators.join(', '),e.skill,e.behav,e.avg];
+  });
+  XLSX.utils.book_append_sheet(wb,toWS(['#','รหัส','ชื่อพนักงาน','แผนก','จำนวนครั้งที่ถูกประเมิน','ผู้ประเมิน','ฝีมือ%','พฤติกรรม%','คะแนนเฉลี่ย'],rows),'คะแนนสูงสุด');
   saveXL(wb,'top10_'+(month||'all'));
 }
 
@@ -546,8 +627,10 @@ function exportBotExcel(){
   var month=document.getElementById('month-sel').value;
   var wb=XLSX.utils.book_new();
   var bot=[].concat(_empList).sort(function(a,b){return a.avg-b.avg}).slice(0,10);
-  var rows=bot.map(function(e,i){return[i+1,e.code,e.name,e.dept,e.avg]});
-  XLSX.utils.book_append_sheet(wb,toWS(['#','รหัส','ชื่อพนักงาน','แผนก','คะแนน'],rows),'คะแนนต่ำสุด');
+  var rows=bot.map(function(e,i){
+    return[i+1,e.code,e.name,e.dept,e.evalCnt,e.evaluators.join(', '),e.skill,e.behav,e.avg];
+  });
+  XLSX.utils.book_append_sheet(wb,toWS(['#','รหัส','ชื่อพนักงาน','แผนก','จำนวนครั้งที่ถูกประเมิน','ผู้ประเมิน','ฝีมือ%','พฤติกรรม%','คะแนนเฉลี่ย'],rows),'คะแนนต่ำสุด');
   saveXL(wb,'bot10_'+(month||'all'));
 }
 
@@ -558,8 +641,8 @@ function exportGradeExcel(){
   var gradeC=_empList.filter(function(e){return e.avg>=65&&e.avg<75});
   var gradeD=_empList.filter(function(e){return e.avg<65});
   [['A ดีเด่น (85+)',gradeA],['B ดีมาก (75-84)',gradeB],['C ผ่านมาตรฐาน (65-74)',gradeC],['D ต้องปรับปรุง (<65)',gradeD]].forEach(function(gv){
-    var rows=gv[1].map(function(e){return[e.code,e.name,e.dept,e.avg]});
-    if(rows.length)XLSX.utils.book_append_sheet(wb,toWS(['รหัส','ชื่อ','แผนก','คะแนน'],rows),gv[0].substring(0,31));
+    var rows=gv[1].map(function(e){return[e.code,e.name,e.dept,e.evalCnt,e.evaluators.join(', '),e.skill,e.behav,e.avg]});
+    if(rows.length)XLSX.utils.book_append_sheet(wb,toWS(['รหัส','ชื่อ','แผนก','จำนวนครั้ง','ผู้ประเมิน','ฝีมือ%','พฤติกรรม%','คะแนนเฉลี่ย'],rows),gv[0].substring(0,31));
   });
   saveXL(wb,'grade_summary');
 }
@@ -569,20 +652,37 @@ function exportDeptExcel(){
   var d=_deptList[_curDeptIdx];
   if(!d)return;
   var wb=XLSX.utils.book_new();
+  // Sheet 1: สรุปรายพนักงาน (ค่าเฉลี่ย)
   var rows=d.emps.map(function(e,i){
-    return[i+1,e.name,e.evaluators.join(', '),e.evalCnt,e.skill,e.behav,e.score];
+    return[i+1,e.code||'',e.name,e.evalCnt,e.evaluators.join(', '),e.skill,e.behav,e.score];
   });
-  XLSX.utils.book_append_sheet(wb,toWS(['#','ชื่อพนักงาน','ผู้ประเมิน','จำนวนครั้งที่ถูกประเมิน','ฝีมือ%','พฤติกรรม%','รวม(เฉลี่ย)'],rows),d.name.substring(0,31));
+  XLSX.utils.book_append_sheet(wb,toWS(['#','รหัส','ชื่อพนักงาน','จำนวนครั้ง','ผู้ประเมิน','ฝีมือ% (เฉลี่ย)','พฤติกรรม% (เฉลี่ย)','รวม (เฉลี่ย)'],rows),d.name.substring(0,20)+' สรุป');
+  // Sheet 2: คะแนนจริงแต่ละครั้ง
+  var detailRows=[];
+  d.emps.forEach(function(e){
+    e.records.forEach(function(rec){
+      detailRows.push([e.code||'',e.name,rec.evaluator,rec.skill,rec.behav,rec.score]);
+    });
+  });
+  if(detailRows.length){
+    XLSX.utils.book_append_sheet(wb,toWS(['รหัส','ชื่อพนักงาน','ผู้ประเมิน','ฝีมือ%','พฤติกรรม%','คะแนนจริง'],detailRows),d.name.substring(0,20)+' รายละเอียด');
+  }
   saveXL(wb,'dept_'+d.name);
 }
 
 function exportAllExcel(){
   var month=document.getElementById('month-sel').value;
   var wb=XLSX.utils.book_new();
-  // Sheet 1: พนักงานทั้งหมด
-  var rows=_empList.map(function(e,i){return[i+1,e.code,e.name,e.dept,e.skill,e.behav,e.avg]});
-  XLSX.utils.book_append_sheet(wb,toWS(['#','รหัส','ชื่อพนักงาน','แผนก','ฝีมือ%','พฤติกรรม%','คะแนนรวม'],rows),'พนักงานทั้งหมด');
-  // Sheet 2: แผนก
+  var rows=_empList.map(function(e,i){return[i+1,e.code,e.name,e.dept,e.evalCnt,e.evaluators.join(', '),e.skill,e.behav,e.avg]});
+  XLSX.utils.book_append_sheet(wb,toWS(['#','รหัส','ชื่อพนักงาน','แผนก','จำนวนครั้ง','ผู้ประเมิน','ฝีมือ%','พฤติกรรม%','คะแนนเฉลี่ย'],rows),'พนักงานทั้งหมด');
+  // Sheet 2: คะแนนจริงทุก record
+  var allRecs=[];
+  _empList.forEach(function(e){
+    e.records.forEach(function(rec){
+      allRecs.push([e.code,e.name,e.dept,rec.evaluator,rec.skill,rec.behav,rec.score]);
+    });
+  });
+  XLSX.utils.book_append_sheet(wb,toWS(['รหัส','ชื่อพนักงาน','แผนก','ผู้ประเมิน','ฝีมือ%','พฤติกรรม%','คะแนนจริง'],allRecs),'คะแนนจริงทุก record');
   var drows=_deptList.map(function(d,i){return[i+1,d.name,d.avg,d.emps.length]});
   XLSX.utils.book_append_sheet(wb,toWS(['#','แผนก','คะแนนเฉลี่ย','จำนวนพนักงาน'],drows),'คะแนนแยกแผนก');
   saveXL(wb,'hr_report_'+(month||'all'));
